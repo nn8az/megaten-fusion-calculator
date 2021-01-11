@@ -1,0 +1,12 @@
+{
+    "Presets": [
+        {
+            "Caption": "Elements",
+            "Demons": ["Erthys", "Aeros", "Aquans", "Flaemis"]
+        },
+        {
+            "Caption": "Auction 1",
+            "Demons": ["Hairy Jack"]
+        }
+    ]
+}

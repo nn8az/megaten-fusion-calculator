@@ -1,0 +1,21 @@
+body {
+    padding: 5px;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    margin: 0;
+}
+
+h1 {
+    text-shadow: 0 0 5px #34abeb, 0 0 20px #34abeb;
+}
+
+h2 {
+    color: #34abeb;
+    margin-top: 30px;
+}
+
+/* Override Material UI */
+.myApp .MuiDataGrid-root .MuiDataGrid-colCell, .myApp .MuiDataGrid-root .MuiDataGrid-cell {
+    padding: 0 8px 0 4px;
+}

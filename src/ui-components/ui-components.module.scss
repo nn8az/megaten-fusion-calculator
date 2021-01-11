@@ -1,0 +1,41 @@
+.demonAdderContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.demonAdderContainer > div {
+    margin: 5px 0;
+}
+
+.demonAdderContainer > h3 {
+    margin: 0;
+}
+
+.subAdderContainer {
+    display: flex;
+}
+
+.lvlFieldsContainer {
+    display: flex;
+}
+
+.lvlFieldsContainer > div:first-child {
+    margin-right: 6px;
+}
+
+.addDemonButton:global(.MuiButtonBase-root) {
+    background-color: seagreen;
+    margin-left: 2px;
+
+    &:hover {
+        background-color: lighten($color: seagreen, $amount: 10)
+    }
+}
+
+.removeDemonButtonIcon {
+    color: palevioletred;
+}
+
+.fusionResultsTable {
+    min-width: 900px;
+}
