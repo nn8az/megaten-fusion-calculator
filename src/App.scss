@@ -5,12 +5,14 @@
         margin: 0;
     }
 
+    $headerColor: #5cbbef;
     h1 {
+        color: $headerColor;
         margin-bottom: 10px;
     }
 
     h2 {
-        color: #5cbbef;
+        color: lighten($color: $headerColor, $amount: 20);
 
         &:not(:first-of-type) {
             margin-top: 30px;
@@ -63,5 +65,13 @@
     /* Override Material UI */
     .MuiDataGrid-root .MuiDataGrid-colCell, .MuiDataGrid-root .MuiDataGrid-cell {
         padding: 0 8px 0 4px;
+    }
+
+    .MuiDataGrid-row.Mui-odd {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .MuiDataGrid-columnsContainer {
+        background-color: rgba(0, 0, 0, 0.4);
     }
 }
