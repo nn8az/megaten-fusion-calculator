@@ -15,7 +15,7 @@ export default function FusionResultTable(params: {
     const columns: ColDef[] = [
       { field: "name", headerName: "Demon", width: 120 },
       { field: "lvl", headerName: "Level", width: 70, headerAlign: "center", resizable: false, disableColumnMenu: true },
-      { field: "race", headerName: "Race", width: 90, headerAlign: "center", resizable: false },
+      { field: "race", headerName: "Race", width: 100, headerAlign: "center", resizable: false },
       { field: "recipe", headerName: "Recipe", width: 1000, cellClassName: styles.recipeCell }
     ]
 

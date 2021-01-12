@@ -1,5 +1,5 @@
 .myApp {
-    padding: 5px;
+    padding: 10px;
 
     h1,h2,h3,h4,h5,h6 {
         margin: 0;
@@ -34,7 +34,7 @@
     }
 
     .calculateButton {
-        margin-right: 2px;
+        margin-right: 6px;
         flex-grow: 2;
     }
 
@@ -68,10 +68,10 @@
     }
 
     .MuiDataGrid-row.Mui-odd {
-        background-color: rgba(0, 0, 0, 0.1);
+        background-color: rgba(0, 0, 0, 0.2);
     }
 
     .MuiDataGrid-columnsContainer {
-        background-color: rgba(0, 0, 0, 0.4);
+        background-color: rgba(0, 0, 0, 0.5);
     }
 }

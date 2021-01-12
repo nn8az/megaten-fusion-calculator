@@ -31,7 +31,7 @@ $add-button-color: #4d7035;
 
 .addDemonButton:global(.MuiButtonBase-root) {
     background-color: $add-button-color;
-    margin-left: 2px;
+    margin-left: 6px;
 
     &:hover {
         background-color: lighten($color: $add-button-color, $amount: 10)
