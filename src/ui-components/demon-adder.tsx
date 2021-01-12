@@ -16,11 +16,11 @@ export default function DemonAdder(params: {
 }): JSX.Element {
     const { demonCompendium, onAddDemon } = params;
     return <div className={styles.demonAdderContainer}>
-        <h3>Add by searching</h3>
+        <p>Add by searching</p>
         <AddByDemon demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
-        <h3>Add by using level range</h3>
+        <p>Add by using level range</p>
         <AddByLevelRange demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
-        <h3>Add from presets</h3>
+        <p>Add from presets</p>
         <AddByPreset demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
     </div>
 }

@@ -66,9 +66,10 @@ export default function FusionIngredientsTable(params: {
         rows={ingredientsAsRowsArray}
         columns={columns}
         disableSelectionOnClick={true}
-        hideFooter={true}
         autoHeight={true}
         density='compact'
+        pageSize={25}
+        rowsPerPageOptions={[25]}
       />
     </div>
   );

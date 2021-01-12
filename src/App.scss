@@ -1,21 +1,67 @@
-body {
+.myApp {
     padding: 5px;
-}
 
-h1,h2,h3,h4,h5,h6 {
-    margin: 0;
-}
+    h1,h2,h3,h4,h5,h6 {
+        margin: 0;
+    }
 
-h1 {
-    text-shadow: 0 0 5px #34abeb, 0 0 20px #34abeb;
-}
+    h1 {
+        margin-bottom: 10px;
+    }
 
-h2 {
-    color: #34abeb;
-    margin-top: 30px;
-}
+    h2 {
+        color: #5cbbef;
 
-/* Override Material UI */
-.myApp .MuiDataGrid-root .MuiDataGrid-colCell, .myApp .MuiDataGrid-root .MuiDataGrid-cell {
-    padding: 0 8px 0 4px;
+        &:not(:first-of-type) {
+            margin-top: 30px;
+        }
+    }
+
+    .addDemonsAndCalcResetButtonContainer {
+        display: inline-flex;
+        flex-direction: column;
+    }
+
+    .calcResetButtonContainer {
+        display: inline-flex;
+        margin-top: 20px;
+    }
+
+    .calcResetButtonContainer > button {
+        height: 60px;
+    }
+
+    .calculateButton {
+        margin-right: 2px;
+        flex-grow: 2;
+    }
+
+    .calculateButton:enabled {
+        background: linear-gradient(90deg, #77c451, #23a6d5, #77c451, #23a6d5);
+        background-size: 300% 100%;
+        animation: gradient 1s linear infinite;
+        @keyframes gradient {
+            from {
+                background-position: 0% 0%;
+            }
+            to {
+                background-position: 100%;
+            }
+        }
+    }
+
+    $reset-button-color: #a82727;
+    .resetButton {
+        background-color: $reset-button-color;
+        flex-grow: 1;
+
+        &:hover {
+            background-color: lighten($color: $reset-button-color, $amount: 10);
+        }
+    }
+
+    /* Override Material UI */
+    .MuiDataGrid-root .MuiDataGrid-colCell, .MuiDataGrid-root .MuiDataGrid-cell {
+        padding: 0 8px 0 4px;
+    }
 }

@@ -1,14 +1,18 @@
 .demonAdderContainer {
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
-}
 
-.demonAdderContainer > div {
-    margin: 5px 0;
-}
+    > p {
+        margin: 0;
 
-.demonAdderContainer > h3 {
-    margin: 0;
+        &:not(:first-of-type) {
+            margin-top: 10px;
+        }
+    }
+
+    > div {
+        margin: 5px 0;
+    }
 }
 
 .subAdderContainer {
@@ -23,12 +27,14 @@
     margin-right: 6px;
 }
 
+$add-button-color: #4d7035;
+
 .addDemonButton:global(.MuiButtonBase-root) {
-    background-color: seagreen;
+    background-color: $add-button-color;
     margin-left: 2px;
 
     &:hover {
-        background-color: lighten($color: seagreen, $amount: 10)
+        background-color: lighten($color: $add-button-color, $amount: 10)
     }
 }
 

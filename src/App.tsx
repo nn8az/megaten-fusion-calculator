@@ -1,5 +1,5 @@
 // Imports for foundational functionalities
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 // Imports for data
 import * as Models from './data/data-models';
@@ -11,6 +11,8 @@ import FusionIngredientsTable from './ui-components/ingredients-table';
 import FusionResultTable from './ui-components/fusion-result-table';
 import DemonAdder from './ui-components/demon-adder';
 
+import ReplayIcon from '@material-ui/icons/Replay';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import './App.scss';
 
 const MAX_FUSION_INGREDIENT = 3;
@@ -20,6 +22,7 @@ function App() {
   let [ingredients, setIngredients] = useState<Models.IngredientDemons>({});
   let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
+  const fusionResultSectionHeader = useRef<HTMLHeadingElement>(null);
 
   function addDemonToIngredients(demons: Models.Demon[]): void {
     const newIngredients = { ...ingredients };
@@ -117,6 +120,13 @@ function App() {
     }
 
     setFusionResults(myFusionResults);
+
+    // Scroll to the fusion result section by using a setTimeout() so it can happen after the section is rendered
+    setTimeout(()=>{
+      if (fusionResultSectionHeader.current != null) {
+        fusionResultSectionHeader.current.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
+      }
+    })
   }
 
   return (
@@ -124,14 +134,18 @@ function App() {
       <header className="App-header">
         <h1>Megami Tensei Fusion Recommender</h1>
       </header>
-        <h2>Add demons to use as fusion ingredient</h2>
+      <h2>Add demons to use as fusion ingredient</h2>
+      <div className="addDemonsAndCalcResetButtonContainer">
         <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredients} />
-        <h2>Fusion Ingredients</h2>
-        <Button variant="outlined" onClick={calculateAllFusionCombinations}>Calculate</Button>
-        <Button variant="outlined" onClick={onResetButtonClick}>Reset</Button>
-        <FusionIngredientsTable demonCompendium={demonCompendium} ingredients={ingredients} onRemoveIngredient={removeDemonFromIngredients} />
-        <h2>Results</h2>
-        <FusionResultTable demonCompendium={demonCompendium} fusionResults={fusionResults} />
+        <div className="calcResetButtonContainer">
+          <Button className="calculateButton" variant="outlined" onClick={calculateAllFusionCombinations} disabled={Object.keys(ingredients).length === 0} ><PlayArrowIcon />Calculate</Button>
+          <Button className="resetButton" variant="outlined" onClick={onResetButtonClick}><ReplayIcon />Reset</Button>
+        </div>
+      </div>
+      <h2>Fusion Ingredients</h2>
+      <FusionIngredientsTable demonCompendium={demonCompendium} ingredients={ingredients} onRemoveIngredient={removeDemonFromIngredients} />
+      <h2 ref={fusionResultSectionHeader}>Results</h2>
+      <FusionResultTable demonCompendium={demonCompendium} fusionResults={fusionResults} />
     </div>
   );
 }
