@@ -207,7 +207,7 @@ export class DemonCompendium {
             element = demonB;
             demon = demonA;
         } else {
-            return undefined;
+            return this.fuseDemonSameRaceNoEle(demonA, demonB);
         }
 
         const raceId: number = this.fusionChartJSON.races.indexOf(demon.race);
