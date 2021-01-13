@@ -64,7 +64,6 @@ function AddByDemon(params: {
 
     return (<div className={styles.subAdderContainer}>
         <Autocomplete
-            id="demon-search-bar"
             value={selectedDemon}
             options={searchOptions}
             onChange={onSearchBarSelectionChange}
@@ -189,7 +188,6 @@ function AddByPreset(params: {
 
     return (<div className={styles.subAdderContainer}>
         <Autocomplete
-            id="demon-search-bar"
             value={selectedOption}
             options={searchOptions}
             onChange={onSearchBarSelectionChange}
