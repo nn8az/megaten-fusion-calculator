@@ -16,9 +16,9 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import './App.scss';
 
 const MAX_FUSION_INGREDIENT = 3;
-const demonCompendium: DemonCompendium = new DemonCompendium();
 
-function App() {
+function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.Element {
+  const { demonCompendium } = params;
   let [ingredients, setIngredients] = useState<Models.IngredientDemons>({});
   let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
@@ -150,4 +150,4 @@ function App() {
   );
 }
 
-export default App;
+export default FusionRecommender;

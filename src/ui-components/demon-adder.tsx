@@ -15,13 +15,21 @@ export default function DemonAdder(params: {
     onAddDemon: (demon: Models.Demon[]) => void
 }): JSX.Element {
     const { demonCompendium, onAddDemon } = params;
+
+    let presetSection: JSX.Element = <React.Fragment />;
+    if (demonCompendium.getDemonPresets().length > 0) { 
+        presetSection = <React.Fragment>
+            <p>Add from presets</p>
+            <AddByPreset demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
+        </React.Fragment>;
+    }
+
     return <div className={styles.demonAdderContainer}>
         <p>Add by searching</p>
         <AddByDemon demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
         <p>Add by using level range</p>
         <AddByLevelRange demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
-        <p>Add from presets</p>
-        <AddByPreset demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
+        {presetSection}
     </div>
 }
 

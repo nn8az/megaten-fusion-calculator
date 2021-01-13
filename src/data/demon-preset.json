@@ -1,8 +1,8 @@
 {
-    "Presets": [
+    "presets": [
         {
-            "Caption": "Elements",
-            "Demons": ["Erthys", "Aeros", "Aquans", "Flaemis"]
+            "caption": "Elements",
+            "demons": ["Erthys", "Aeros", "Aquans", "Flaemis"]
         }
     ]
 }
