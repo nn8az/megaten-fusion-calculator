@@ -25,6 +25,10 @@ export class FusedDemon {
         this.ingredientB = ingredientB;
     }
 
+    public isFused(): boolean {
+        return this.ingredientA !== undefined && this.ingredientB !== undefined;
+    }
+
     public toRecipeString(): string {
         let str: string = "";
         const separator: string = " | ";
@@ -37,6 +41,17 @@ export class FusedDemon {
             str += this.ingredientA.demon.name + " + " + this.ingredientB.demon.name + " = " + this.demon.name;
         }
         return str;
+    }
+
+    public toBaseIngredientSearchString(): string {
+        let str: string = "";
+        if (this.ingredientA && this.ingredientB) {
+            str += this.ingredientA.toBaseIngredientSearchString();
+            str += this.ingredientB.toBaseIngredientSearchString();
+            return str;
+        } else {
+            return this.demon.name;
+        }
     }
 
     public isWeakerThanIngredients(): boolean {
