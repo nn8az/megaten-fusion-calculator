@@ -13,7 +13,7 @@ import DemonAdder from '../ui-components/demon-adder';
 
 import ReplayIcon from '@material-ui/icons/Replay';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import './FusionRecommender.scss';
+import styles from './FusionRecommender.module.scss';
 
 const MAX_FUSION_INGREDIENT = 3;
 
@@ -130,16 +130,13 @@ function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.El
   }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Megami Tensei Fusion Recommender</h1>
-      </header>
+    <div className={styles.fusionRecommender}>
       <h2>Add demons to use as fusion ingredient</h2>
-      <div className="addDemonsAndCalcResetButtonContainer">
+      <div className={styles.addDemonsAndCalcResetButtonContainer}>
         <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredients} />
-        <div className="calcResetButtonContainer">
-          <Button className="calculateButton" variant="outlined" onClick={calculateAllFusionCombinations} disabled={Object.keys(ingredients).length === 0} ><PlayArrowIcon />Calculate</Button>
-          <Button className="resetButton" variant="outlined" onClick={onResetButtonClick}><ReplayIcon />Reset</Button>
+        <div className={styles.calcResetButtonContainer}>
+          <Button className={styles.calculateButton} variant="outlined" onClick={calculateAllFusionCombinations} disabled={Object.keys(ingredients).length === 0} ><PlayArrowIcon />Calculate</Button>
+          <Button className={styles.resetButton} variant="outlined" onClick={onResetButtonClick}><ReplayIcon />Reset</Button>
         </div>
       </div>
       <h2>Fusion Ingredients</h2>

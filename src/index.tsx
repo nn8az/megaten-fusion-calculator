@@ -2,28 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 
-import Desu2FusionRecommender from './desu2/Desu2FusionRecommender';
-import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
-import CssBaseline from '@material-ui/core/CssBaseline';
-
-const theme = createMuiTheme({
-  palette: {
-    type: "dark",
-  },
-  typography: {
-    fontFamily: "sans-serif",
-    fontSize: 14
-  }
-});
+import App from './App';
 
 ReactDOM.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-        <div className="myApp">
-          <Desu2FusionRecommender />
-        </div>
-    </ThemeProvider>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

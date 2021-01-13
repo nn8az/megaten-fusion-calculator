@@ -1,0 +1,45 @@
+.fusionRecommender {
+    .addDemonsAndCalcResetButtonContainer {
+        display: inline-flex;
+        flex-direction: column;
+    }
+
+    .calcResetButtonContainer {
+        display: inline-flex;
+        margin-top: 20px;
+    }
+
+    .calcResetButtonContainer > button {
+        height: 60px;
+    }
+
+    .calculateButton {
+        margin-right: 6px;
+        flex-grow: 2;
+    }
+
+    .calculateButton:enabled {
+        background-color: #579737;
+        animation: shining 1s ease-in-out infinite alternate;
+        @keyframes shining {
+            from {
+                text-shadow: none;
+            }
+            to {
+                text-shadow: 
+                    0 0 7px white,
+                    0 0 15px white,
+            }
+        }
+    }
+
+    $reset-button-color: #a82727;
+    .resetButton {
+        background-color: $reset-button-color;
+        flex-grow: 1;
+
+        &:hover {
+            background-color: lighten($color: $reset-button-color, $amount: 10);
+        }
+    }
+}
