@@ -2,12 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 
-import FusionRecommender from './FusionRecommender';
-import {DemonCompendium} from './data/demon-compendium';
-import {default as demonListJSON} from './data/demon-list.json';
-import {default as fusionChartJSON} from './data/fusion-chart.json';
-import {default as presetJSON} from './data/demon-preset.json';
-
+import Desu2FusionRecommender from './desu2/Desu2FusionRecommender';
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
 
@@ -26,7 +21,7 @@ ReactDOM.render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
         <div className="myApp">
-          <FusionRecommender demonCompendium={new DemonCompendium(demonListJSON, fusionChartJSON, presetJSON)}/>
+          <Desu2FusionRecommender />
         </div>
     </ThemeProvider>
   </React.StrictMode>,
