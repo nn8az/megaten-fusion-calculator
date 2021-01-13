@@ -36,7 +36,7 @@ export default function FusionResultTable(params: {
             }
         }
     }
-    ingredientsAsRowsArray.sort((a, b) => { return a.lvl - b.lvl});
+    ingredientsAsRowsArray.sort((a, b) => { return b.lvl - a.lvl});
     let id: number = 1;
     for (const row of ingredientsAsRowsArray) {
         row.id = id;
