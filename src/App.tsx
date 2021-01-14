@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -18,30 +18,24 @@ const theme = createMuiTheme({
   }
 });
 
-let demonCompendium: DemonCompendium;
-let demonCompendiumBeingLoaded: boolean = false;
-let demonCompendiumHasBeenSetPromise: Promise<void>;
-
-function loadDesu2DemonCompendium(): void {
-  if (demonCompendiumBeingLoaded) { return; }
-  const demonListJsonPromise = import("./desu2/demon-list.json").then(importedJson => importedJson.default);
+function loadDesu2DemonCompendium(callback: (demonCompendium: DemonCompendium) => void): void {
+  const demonListJsonPromise = import("./desu2/demons.json").then(importedJson => importedJson.default);
   const fusionChartJsonPromise = import("./desu2/fusion-chart.json").then(importedJson => importedJson.default);
-  const presetJsonPromise = import("./desu2/demon-preset.json").then(importedJson => importedJson.default);
-  demonCompendiumBeingLoaded = true;
-  demonCompendiumHasBeenSetPromise = Promise.all([demonListJsonPromise, fusionChartJsonPromise, presetJsonPromise]).then(loadedJsons => {
-    demonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], loadedJsons[2]);
+  const presetJsonPromise = import("./desu2/presets.json").then(importedJson => importedJson.default);
+  Promise.all([demonListJsonPromise, fusionChartJsonPromise, presetJsonPromise]).then(loadedJsons => {
+    const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], loadedJsons[2]);
+    callback(newDemonCompendium);
   })
 }
 
 export default function App(): JSX.Element {
-  const [ , setRerenderTrigger] = useState<boolean>(false);
+  const [demonCompendium, setDemonCompendium] = useState<DemonCompendium | undefined>(undefined);
 
-  console.log("App() called!");
-
-  if (!demonCompendium) {
-    loadDesu2DemonCompendium();
-    demonCompendiumHasBeenSetPromise.then(() => { setRerenderTrigger(true) });
-  }
+  useEffect(()=>{
+    if (!demonCompendium) {
+      loadDesu2DemonCompendium(setDemonCompendium);
+    }
+  }, [demonCompendium]);
 
   let fusionRecommender: JSX.Element = (demonCompendium) ? <FusionRecommender demonCompendium={demonCompendium} /> : <React.Fragment />;
   return (
