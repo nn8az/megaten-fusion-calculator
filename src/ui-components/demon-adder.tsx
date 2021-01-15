@@ -27,7 +27,7 @@ export default function DemonAdder(params: {
     return <div className={styles.demonAdderContainer}>
         <p>Add by searching</p>
         <AddByDemon demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
-        <p>Add by using level range</p>
+        <p>Add by entering level range</p>
         <AddByLevelRange demonCompendium={demonCompendium} onAddDemon={onAddDemon} />
         {presetSection}
     </div>

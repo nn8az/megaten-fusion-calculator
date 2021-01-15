@@ -131,7 +131,7 @@ function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.El
 
   return (
     <div className={styles.fusionRecommender}>
-      <h2>Add demons to use as fusion ingredient</h2>
+      <h2>Add demons to use as fusion ingredients</h2>
       <div className={styles.addDemonsAndCalcResetButtonContainer}>
         <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredients} />
         <div className={styles.calcResetButtonContainer}>
