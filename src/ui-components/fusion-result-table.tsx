@@ -49,24 +49,34 @@ export default function FusionResultTable(params: {
     const columns: ColDef[] = [
       { field: "name", headerName: "Demon", width: 120 },
       { field: "lvl", headerName: "Level", width: 70, headerAlign: "center", resizable: false, disableColumnMenu: true },
-      { field: "race", headerName: "Race", width: 100, headerAlign: "center", resizable: false },
-      { field: "recipe", headerName: "Recipe", width: 1000, renderCell: renderRecipeWrapper, valueGetter: getRecipeAsString}
+      { field: "race", headerName: "Race", width: 100, headerAlign: "center", resizable: false }
     ]
+    const statsName: string[] = Models.Demon.statsName;
+    for (let i = 0; i < statsName.length; i++) {
+        columns.push(
+            { field: "stat" + i, headerName: statsName[i], width: 60, headerAlign: "center", resizable: false, disableColumnMenu: true}
+        );
+    }
+    columns.push(
+        { field: "recipe", headerName: "Recipe", flex: 1, renderCell: renderRecipeWrapper, valueGetter: getRecipeAsString});
 
-    type Row = { id: number, name: string, lvl: number, race: string, recipe: Models.FusedDemon }
-    const ingredientsAsRowsArray:Row[] = [];
+    const ingredientsAsRowsArray = [];
     for (const size in fusionResults) {
         if (Number(size) === 1) { continue; }
         for (const demonName in fusionResults[size]) {
             for (const fusedDemon of fusionResults[size][demonName]) {
                 const {demon} = fusedDemon;
-                ingredientsAsRowsArray.push({
+                const demonRow: any = {
                     "id": 0,
                     "name": demon.name,
                     "lvl": demon.lvl,
                     "race": demon.race,
                     "recipe": fusedDemon
-                });
+                };
+                for (let i = 0; i < statsName.length; i++) {
+                    demonRow["stat" + i] = demon.stats[i];
+                }
+                ingredientsAsRowsArray.push(demonRow);
             }
         }
     }

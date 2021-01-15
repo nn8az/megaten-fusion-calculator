@@ -1,16 +1,19 @@
 export class Demon {
-    id: number;
+    id: number = 0;
     name: string;
     lvl: number;
     race: string;
-    rank: number = 0; // rank will be set to 1000 for demons that need unique recipe
+    rank: number = 0;
     uniqueRecipe: boolean = false;
+    stats: number[] = [];
+    static statsName: string[] = [];
 
-    constructor(id: number, name: string, lvl: number, race: string) {
+    constructor(id: number, name: string, lvl: number, race: string, stats: number[]) {
         this.id = id;
         this.name = name;
         this.lvl = lvl;
         this.race = race;
+        this.stats = stats;
     }
 }
 

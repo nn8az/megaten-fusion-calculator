@@ -2,9 +2,9 @@ import * as Models from './data-models';
 
 const ELEMENT_RACE: string = "Element";
 
-type DemonInfo = { lvl: number, race: string};
-type DemonListJSON = { [demonName: string]: DemonInfo};
-type FusionChartJSON = {
+type DemonInfo = { lvl: number, race: string, stats: number[] };
+type DemonJson = { demons: {[demonName: string]: DemonInfo}, statsName: string[] };
+type FusionChartJson = {
     races: string[],
     elements: string[],
     elementFusionTable: number[][],
@@ -14,9 +14,9 @@ type Preset = { caption: string, demons: string[] };
 type PresetJSON = { presets: Preset[] };
 
 export class DemonCompendium {
-    private demonListJSON: DemonListJSON;
-    private fusionChartJSON: FusionChartJSON;
-    private presetJSON?: PresetJSON;
+    private demonJson: DemonJson;
+    private fusionChartJson: FusionChartJson;
+    private presetJson?: PresetJSON;
 
     private demonAry: Models.Demon[] = [];
     private raceFusionTable: { [race: string]: { [race: string]: string } } = {}; // Maps 2 races to the race that results from their fusion. Example usage: x["Fairy"]["Genma"] gives you race that results from fusing a Fairy demon with a Genma demon. Special case: when both of the 2 races are the same, the result is a demon's name instead of a race.
@@ -26,10 +26,10 @@ export class DemonCompendium {
     private nameMap: { [demonName: string]: Models.Demon } = {} // Maps name to a demon model object
     private raceLvlDemonMap: { [race: string]: { [lvl: number]: Models.Demon } } = {}; // Maps race-lv a demon with that race and lv. Example usage: x["Fairy"][32] gives you a demon that is a lv32 fairy
 
-    constructor(demonListJSON: DemonListJSON, fusionChartJSON: FusionChartJSON, presetJSON?: PresetJSON) {
-        this.demonListJSON = demonListJSON;
-        this.fusionChartJSON = fusionChartJSON;
-        this.presetJSON = presetJSON;
+    constructor(demonListJSON: DemonJson, fusionChartJSON: FusionChartJson, presetJSON?: PresetJSON) {
+        this.demonJson = demonListJSON;
+        this.fusionChartJson = fusionChartJSON;
+        this.presetJson = presetJSON;
 
         this.parseDemons();
         this.prepDemonIds();
@@ -75,28 +75,32 @@ export class DemonCompendium {
     }
 
     private testGetRandomElement(): Models.Demon | undefined {
-        if (this.fusionChartJSON.elements.length === 0) {return undefined};
-        const randomElementIndex: number = Math.floor(Math.random() * this.fusionChartJSON.elements.length);
-        return this.getDemonByName(this.fusionChartJSON.elements[randomElementIndex]);
+        if (this.fusionChartJson.elements.length === 0) {return undefined};
+        const randomElementIndex: number = Math.floor(Math.random() * this.fusionChartJson.elements.length);
+        return this.getDemonByName(this.fusionChartJson.elements[randomElementIndex]);
     }
 
     private parseDemons(): void {
-        for (const demonName in this.demonListJSON) {
+        Models.Demon.statsName = this.demonJson.statsName;
+        const demons = this.demonJson.demons;
+        for (const demonName in demons) {
+            const demon = demons[demonName]
             this.demonAry.push(new Models.Demon(
                 0,
                 demonName,
-                this.demonListJSON[demonName].lvl,
-                this.demonListJSON[demonName].race
+                demon.lvl,
+                demon.race,
+                demon.stats
             ));
         }
     }
 
     private parseRaceFusionTable(): void {
-        for (let row: number = 0; row < this.fusionChartJSON.raceFusionTable.length; row++) {
-            for (let col: number = 0; col < this.fusionChartJSON.raceFusionTable[row].length; col++) {
-                const raceA: string = this.fusionChartJSON.races[row];
-                const raceB: string = this.fusionChartJSON.races[col];
-                const raceC: string = this.fusionChartJSON.raceFusionTable[row][col];
+        for (let row: number = 0; row < this.fusionChartJson.raceFusionTable.length; row++) {
+            for (let col: number = 0; col < this.fusionChartJson.raceFusionTable[row].length; col++) {
+                const raceA: string = this.fusionChartJson.races[row];
+                const raceB: string = this.fusionChartJson.races[col];
+                const raceC: string = this.fusionChartJson.raceFusionTable[row][col];
 
                 // Set the .raceA.raceB property of the parsed fusion table
                 if (!this.raceFusionTable[raceA]) {
@@ -114,8 +118,8 @@ export class DemonCompendium {
     }
 
     private parsePresets(): void {
-        if (!this.presetJSON) { return; }
-        for (const preset of this.presetJSON.presets) {
+        if (!this.presetJson) { return; }
+        for (const preset of this.presetJson.presets) {
             const demons: Models.Demon[] = [];
             for (const demonName of preset.demons) {
                 const demon: Models.Demon | undefined = this.getDemonByName(demonName);
@@ -210,9 +214,9 @@ export class DemonCompendium {
             return this.fuseDemonSameRaceNoEle(demonA, demonB);
         }
 
-        const raceId: number = this.fusionChartJSON.races.indexOf(demon.race);
-        if (raceId < 0 || raceId >= this.fusionChartJSON.elementFusionTable.length) {return undefined;}
-        const demonRankChange: number = this.fusionChartJSON.elementFusionTable[raceId][element.rank];
+        const raceId: number = this.fusionChartJson.races.indexOf(demon.race);
+        if (raceId < 0 || raceId >= this.fusionChartJson.elementFusionTable.length) {return undefined;}
+        const demonRankChange: number = this.fusionChartJson.elementFusionTable[raceId][element.rank];
         const lvlTable: number[] = this.getLvlTableForRace(demon.race);
         const resultRank: number = demon.rank + demonRankChange;
         if (resultRank < 0 || resultRank >= lvlTable.length) { return undefined };
