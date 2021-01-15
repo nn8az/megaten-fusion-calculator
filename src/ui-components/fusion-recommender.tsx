@@ -2,18 +2,18 @@
 import React, { useRef, useState } from 'react';
 
 // Imports for data
-import * as Models from './data-models';
-import { DemonCompendium } from './demon-compendium';
+import * as Models from '../data/data-models';
+import { DemonCompendium } from '../data/demon-compendium';
 
 // Imports for UI components
 import Button from '@material-ui/core/Button';
-import FusionIngredientsTable from '../ui-components/ingredients-table';
-import FusionResultTable from '../ui-components/fusion-result-table';
-import DemonAdder from '../ui-components/demon-adder';
+import FusionIngredientsTable from './ingredients-table';
+import FusionResultTable from './fusion-result-table';
+import DemonAdder from './demon-adder';
 
 import ReplayIcon from '@material-ui/icons/Replay';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import styles from './FusionRecommender.module.scss';
+import styles from './fusion-recommender.module.scss';
 
 const MAX_FUSION_INGREDIENT = 3;
 

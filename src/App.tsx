@@ -4,7 +4,7 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { DemonCompendium } from './data/demon-compendium';
-import FusionRecommender from './data/FusionRecommender';
+import FusionRecommender from './ui-components/fusion-recommender';
 
 import './App.scss';
 
