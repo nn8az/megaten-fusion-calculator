@@ -19,22 +19,27 @@
     }
 
     $calculate-button-color: #579737;
-    $calculate-button-glow-color: mix($calculate-button-color, yellow, 75%);
+    $calculate-button-glow-color: mix($calculate-button-color, yellow, 50%);
     .calculateButton:enabled {
-        background-color: $calculate-button-color;
+        background: linear-gradient(
+            45deg, 
+            $calculate-button-color 0%, 
+            $calculate-button-color 40%, 
+            $calculate-button-glow-color 50%, 
+            $calculate-button-color 60%, 
+            $calculate-button-color 100%);
+        background-repeat: repeat-x;
+        background-size: 200% 100%;
         animation: shining 2s linear infinite;
         @keyframes shining {
             0% {
-                box-shadow: none;
+                background-position-x: -40%;
             }
-            16% {
-                box-shadow: 
-                    0 0 7px $calculate-button-glow-color,
-                    0 0 10px $calculate-button-glow-color,
-                    0 0 15px $calculate-button-glow-color,
+            12% {
+                background-position-x: 140%;
             }
-            33% {
-                box-shadow: none;
+            100% {
+                background-position-x: 140%;
             }
         }
     }
