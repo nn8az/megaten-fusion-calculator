@@ -12,6 +12,7 @@ type FusionChartJson = {
     elementFusionTable?: number[][],
     usePersonaSameRaceFusionMechanic?: boolean,
     usePersonaTripleFusionMechanic?: boolean,
+    disableSameDemonFusion?: boolean,
     specialRecipes?: { [resultName: string]: string[] }
 }
 type Preset = { caption: string, demons: string[] };
@@ -27,9 +28,13 @@ export class DemonCompendium {
     private tripleFusionChart: { [race: string]: { [race: string]: string } } = {}; 
     private demonsPresets: Models.DemonsPreset[] = [];
     private gameHasElements: boolean = false;
+    private usePersonaSameRaceFusionMechanic: boolean = false;
+    private usePersonaTripleFusionMechanic: boolean = false;
+    private disableSameDemonFusion: boolean = false;
 
     private idMap: { [demonId: number]: Models.Demon } = {}; // Maps id to a demon model object
     private nameMap: { [demonName: string]: Models.Demon } = {} // Maps name to a demon model object
+    private raceOrderMap: { [race: string]: number } = {}
     private raceLvlDemonMap: { [race: string]: { [lvl: number]: Models.Demon } } = {}; // Maps race-lv a demon with that race and lv. Example usage: x["Fairy"][32] gives you a demon that is a lv32 fairy
 
     constructor(demonListJSON: DemonJson, fusionChartJSON: FusionChartJson, presetJSON?: PresetJSON) {
@@ -44,6 +49,8 @@ export class DemonCompendium {
         this.prepRaceLvlInfo();
         
         this.parsePresets();
+
+        this.testTripleFuseDemonWithAll("Atavaka");
     }
 
     public getDemonById(id: number): Models.Demon | undefined {
@@ -63,6 +70,8 @@ export class DemonCompendium {
     }
 
     public fuseDemons(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
+        if (demonA.id === demonB.id && this.disableSameDemonFusion) { return undefined; }
+        
         if (demonA.race === ELEMENT_RACE && demonB.race === ELEMENT_RACE) {
             return undefined;
         } else if (demonA.race === ELEMENT_RACE || demonB.race === ELEMENT_RACE) {
@@ -74,7 +83,39 @@ export class DemonCompendium {
         }
     }
 
-    private testGetRandomDemon(): Models.Demon | undefined {
+    public tripleFuseDemons(demonA: Models.Demon, demonB: Models.Demon, demonC: Models.Demon): Models.Demon | undefined {
+        if (this.disableSameDemonFusion) {
+            if (demonA.id === demonB.id ||
+                demonA.id === demonC.id ||
+                demonB.id === demonC.id) { return undefined; }
+        }
+
+        const [demonWeak, demonMid, demonStrong] = [demonA, demonB, demonC].sort((x, y) => (x.lvl !== y.lvl) ? x.lvl - y.lvl : this.getRaceOrder(y.race) - this.getRaceOrder(x.race)); // sorted from lowest to highest
+        const intermediateRace: string | undefined = this.getFusionRace(demonWeak.race, demonMid.race);
+        if (!intermediateRace) { return undefined; }
+        const resultRace: string | undefined = this.getTripleFusionRace(intermediateRace, demonStrong.race);
+        if (!resultRace) { return undefined; }
+        const resultLvlTable: number[] = this.getLvlTableForRace(resultRace, true);
+        const resultLvlTest: number = (demonWeak.lvl + demonMid.lvl + demonStrong.lvl + 12.75) / 3;
+        let resultLvl: number = this.findResultLvlFromLvlTable(resultLvlTable, resultLvlTest, true);
+        let demonResult: Models.Demon | undefined = this.getDemonFromRaceLvl(resultRace, resultLvl);
+        if (!demonResult) { return undefined; }
+        if (demonResult.id !== demonWeak.id && demonResult.id !== demonMid.id && demonResult.id !== demonStrong.id) {
+            return demonResult;
+        } else {
+            let resultLvlIndex = resultLvlTable.indexOf(resultLvl);
+            if (resultLvlIndex < 0) {return undefined; }
+            if (resultLvlIndex + 1 < resultLvlTable.length) {
+                resultLvl = resultLvlTable[resultLvlIndex + 1];
+                return this.getDemonFromRaceLvl(resultRace, resultLvl);
+            } else {
+                return undefined;
+            }
+        }
+    }
+
+    private testGetDemon(demonName?: string): Models.Demon | undefined {
+        if (demonName) { return this.getDemonByName(demonName); }
         if (this.demonAry.length === 0) { return undefined };
         const randomDemonIndex: number = Math.floor(Math.random() * this.demonAry.length);
         return this.demonAry[randomDemonIndex];
@@ -87,16 +128,36 @@ export class DemonCompendium {
     }
 
     private testFuseDemonWithAll(demonName?: string): void {
-        const demon = demonName ? this.getDemonByName(demonName): this.testGetRandomDemon();
+        const demon = this.testGetDemon(demonName);
         if (!demon) { return; }
         const results: { [name: string]: Models.Demon} = {};
         for (let i = 0; i < this.demonAry.length; i++) {
             const demonB = this.demonAry[i];
-            const demonR = this.fuseDemons(demon, this.demonAry[i]);
+            const demonR = this.fuseDemons(demon, demonB);
             if (!demonR) {continue;}
             results[demonB.name] = demonR;
         }
         
+        console.log(demon);
+        console.log(results);
+    }
+
+    private testTripleFuseDemonWithAll(demonName?: string): void {
+        const demon = this.testGetDemon(demonName);
+        if (!demon) { return; }
+        const results: { [resultName: string]: Models.Demon[][] } = {};
+        for (let i = 0; i < this.demonAry.length; i++) {
+            const demonB = this.demonAry[i];
+            for (let j = i; j < this.demonAry.length; j++) {
+                const demonC = this.demonAry[j];
+                const demonR = this.tripleFuseDemons(demon, demonB, demonC);
+                if (!demonR) {continue;}
+                if (!results[demonR.name]) {
+                    results[demonR.name] = [];
+                }
+                results[demonR.name].push([demonB, demonC]);
+            }
+        }
         console.log(demon);
         console.log(results);
     }
@@ -118,25 +179,35 @@ export class DemonCompendium {
 
     private parseFusionChart(): void {
         if (this.fusionChartJson.elements && this.fusionChartJson.elements.length > 0) { this.gameHasElements = true; }
+        if (this.fusionChartJson.usePersonaSameRaceFusionMechanic) { this.usePersonaSameRaceFusionMechanic = true; }
+        if (this.fusionChartJson.usePersonaTripleFusionMechanic) { this.usePersonaTripleFusionMechanic = true; }
+        if (this.fusionChartJson.disableSameDemonFusion) { this.disableSameDemonFusion = true; }
 
         for (let row: number = 0; row < this.fusionChartJson.raceFusionTable.length; row++) {
             for (let col: number = 0; col < this.fusionChartJson.raceFusionTable[row].length; col++) {
-                if (col < row) { continue; }
+                let chart = this.normalFusionChart;
+                if (col < row) { 
+                    if (!this.usePersonaTripleFusionMechanic) {
+                        continue;
+                    }
+                    chart = this.tripleFusionChart;
+                }
+
                 const raceA: string = this.fusionChartJson.races[row];
                 const raceB: string = this.fusionChartJson.races[col];
                 const raceC: string = this.fusionChartJson.raceFusionTable[row][col];
 
                 // Set the .raceA.raceB property of the parsed fusion table
-                if (!this.normalFusionChart[raceA]) {
-                    this.normalFusionChart[raceA] = {};
+                if (!chart[raceA]) {
+                    chart[raceA] = {};
                 }
-                this.normalFusionChart[raceA][raceB] = raceC;
+                chart[raceA][raceB] = raceC;
 
                 // Set the .raceB.raceA property of the parsed fusion table
-                if (!this.normalFusionChart[raceB]) {
-                    this.normalFusionChart[raceB] = {};
+                if (!chart[raceB]) {
+                    chart[raceB] = {};
                 }
-                this.normalFusionChart[raceB][raceA] = raceC;
+                chart[raceB][raceA] = raceC;
             }
         }
 
@@ -147,6 +218,10 @@ export class DemonCompendium {
                 demon.specialRecipe = true;
                 demon.rank = 1000;
             }
+        }
+
+        for (let i = 0; i < this.fusionChartJson.races.length; i++) {
+            this.raceOrderMap[this.fusionChartJson.races[i]] = i;
         }
     }
 
@@ -188,13 +263,13 @@ export class DemonCompendium {
         }
     }
 
-    private getLvlTableForRace(race: string, excludeDemonsWithUniqueRecipe?: boolean): number[] {
+    private getLvlTableForRace(race: string, excludeDemonsWithSpecialRecipe?: boolean): number[] {
         if (!this.raceLvlDemonMap[race]) {
             return [];
         }
         const lvlTable: number[] = [];
         for (const lvl in this.raceLvlDemonMap[race]) {
-            if (excludeDemonsWithUniqueRecipe && this.raceLvlDemonMap[race][lvl].specialRecipe) {
+            if (excludeDemonsWithSpecialRecipe && this.raceLvlDemonMap[race][lvl].specialRecipe) {
                 continue;
             }
             lvlTable.push(Number(lvl));
@@ -211,38 +286,58 @@ export class DemonCompendium {
         return undefined;
     }
 
-    private getFusionResultRace(raceA: string, raceB: string): string | undefined {
+    private getFusionRace(raceA: string, raceB: string): string | undefined {
         if (this.normalFusionChart[raceA]) {
             if (this.normalFusionChart[raceA][raceB]) {
                 return this.normalFusionChart[raceA][raceB];
             }
         }
-        return undefined
+        return undefined;
+    }
+
+    private getTripleFusionRace(raceA: string, raceB: string): string | undefined {
+        if (this.tripleFusionChart[raceA]) {
+            if (this.tripleFusionChart[raceA][raceB]) {
+                return this.tripleFusionChart[raceA][raceB];
+            }
+        }
+        return undefined;
+    }
+
+    private getRaceOrder(race: string): number {
+        return this.raceOrderMap[race];
+    }
+
+    private findResultLvlFromLvlTable(lvlTable: number[], lvlToCheck: number, isTripleFusion?: boolean) {
+        let index = 0;
+        for (let i = 0; i < lvlTable.length; i++) {
+            if (lvlToCheck > lvlTable[i]) {
+                index++;
+            }
+        }
+        if (index >= lvlTable.length) { 
+            if (isTripleFusion) { return -1; }
+            index = lvlTable.length - 1 
+        };
+        return lvlTable[index];
     }
 
     private fuseDemonDiffRaceNoElement(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
-        const raceR: string | undefined = this.getFusionResultRace(demonA.race, demonB.race);
+        const raceR: string | undefined = this.getFusionRace(demonA.race, demonB.race);
         if (!raceR) { return undefined; }
         const lvlTableR: number[] = this.getLvlTableForRace(raceR, true);
         if (lvlTableR.length === 0) { return undefined; }
-        const modedLvlTableR: number[] = lvlTableR.map((lvl) => { return 2 * lvl - demonA.lvl - 1 });
-        let lvlIndexR = 0;
-        for (let i = 0; i < modedLvlTableR.length; i++) {
-            if (demonB.lvl > modedLvlTableR[i]) {
-                lvlIndexR++;
-            }
-        }
-        if (lvlIndexR >= lvlTableR.length) { lvlIndexR = lvlTableR.length - 1 };
-        const lvlR: number = lvlTableR[lvlIndexR];
+        const lvlResultTest = (demonB.lvl + demonA.lvl + 1) / 2;
+        const lvlR: number = this.findResultLvlFromLvlTable(lvlTableR, lvlResultTest);
         return this.getDemonFromRaceLvl(raceR, lvlR)
     }
 
     private fuseDemonSameRaceNoElement(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
         if (this.gameHasElements) {
-            const elementNameR: string | undefined = this.getFusionResultRace(demonA.race, demonB.race);
+            const elementNameR: string | undefined = this.getFusionRace(demonA.race, demonB.race);
             if (!elementNameR) { return undefined; }
             return this.getDemonByName(elementNameR);
-        } else if (this.fusionChartJson.usePersonaSameRaceFusionMechanic) {
+        } else if (this.usePersonaSameRaceFusionMechanic) {
             const resultLvlTable = this.getLvlTableForRace(demonB.race, true).filter(lvl => lvl !== demonA.lvl);
             let resultLvlIndex = -1;
             for (const resultLvl of resultLvlTable) {
