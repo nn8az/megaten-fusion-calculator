@@ -50,7 +50,7 @@ export class DemonCompendium {
         
         this.parsePresets();
 
-        this.testTripleFuseDemonWithAll("Atavaka");
+        this.testFuseDemonWithAll("Suparna");
     }
 
     public getDemonById(id: number): Models.Demon | undefined {
@@ -90,7 +90,7 @@ export class DemonCompendium {
                 demonB.id === demonC.id) { return undefined; }
         }
 
-        const [demonWeak, demonMid, demonStrong] = [demonA, demonB, demonC].sort((x, y) => (x.lvl !== y.lvl) ? x.lvl - y.lvl : this.getRaceOrder(y.race) - this.getRaceOrder(x.race)); // sorted from lowest to highest
+        const [demonWeak, demonMid, demonStrong] = [demonA, demonB, demonC].sort((x, y) => (x.lvl !== y.lvl) ? x.lvl - y.lvl : this.getRaceOrder(y.race) - this.getRaceOrder(x.race)); // sort from lowest to highest lv. If lvs are the same, sort by race order from highest to lowest.
         const intermediateRace: string | undefined = this.getFusionRace(demonWeak.race, demonMid.race);
         if (!intermediateRace) { return undefined; }
         const resultRace: string | undefined = this.getTripleFusionRace(intermediateRace, demonStrong.race);
@@ -104,7 +104,7 @@ export class DemonCompendium {
             return demonResult;
         } else {
             let resultLvlIndex = resultLvlTable.indexOf(resultLvl);
-            if (resultLvlIndex < 0) {return undefined; }
+            if (resultLvlIndex < 0) { return undefined; }
             if (resultLvlIndex + 1 < resultLvlTable.length) {
                 resultLvl = resultLvlTable[resultLvlIndex + 1];
                 return this.getDemonFromRaceLvl(resultRace, resultLvl);
@@ -146,20 +146,25 @@ export class DemonCompendium {
         const demon = this.testGetDemon(demonName);
         if (!demon) { return; }
         const results: { [resultName: string]: Models.Demon[][] } = {};
+        const results2: { [resultName: string]: { [ing2Name: string]: string[] } } = {};
         for (let i = 0; i < this.demonAry.length; i++) {
             const demonB = this.demonAry[i];
             for (let j = i; j < this.demonAry.length; j++) {
                 const demonC = this.demonAry[j];
                 const demonR = this.tripleFuseDemons(demon, demonB, demonC);
                 if (!demonR) {continue;}
-                if (!results[demonR.name]) {
-                    results[demonR.name] = [];
-                }
+                if (!results[demonR.name]) { results[demonR.name] = []; }
+                if (!results2[demonR.name]) { results2[demonR.name] = {}; }
+                if (!results2[demonR.name][demonB.name]) { results2[demonR.name][demonB.name] = []; }
+                if (!results2[demonR.name][demonC.name]) { results2[demonR.name][demonC.name] = []; }
                 results[demonR.name].push([demonB, demonC]);
+                results2[demonR.name][demonB.name].push(demonC.name);
+                results2[demonR.name][demonC.name].push(demonB.name);
             }
         }
         console.log(demon);
         console.log(results);
+        console.log(results2);
     }
 
     private parseDemons(): void {
@@ -185,12 +190,21 @@ export class DemonCompendium {
 
         for (let row: number = 0; row < this.fusionChartJson.raceFusionTable.length; row++) {
             for (let col: number = 0; col < this.fusionChartJson.raceFusionTable[row].length; col++) {
-                let chart = this.normalFusionChart;
-                if (col < row) { 
-                    if (!this.usePersonaTripleFusionMechanic) {
+                const chartsToUpdate = [];
+                if (this.usePersonaTripleFusionMechanic) {
+                    if (col < row) {
+                        chartsToUpdate.push(this.tripleFusionChart);
+                    } else if (col === row) {
+                        chartsToUpdate.push(this.tripleFusionChart);
+                        chartsToUpdate.push(this.normalFusionChart);
+                    } else {
+                        chartsToUpdate.push(this.normalFusionChart);
+                    }
+                } else {
+                    if (col > row) { 
                         continue;
                     }
-                    chart = this.tripleFusionChart;
+                    chartsToUpdate.push(this.normalFusionChart);
                 }
 
                 const raceA: string = this.fusionChartJson.races[row];
@@ -198,16 +212,18 @@ export class DemonCompendium {
                 const raceC: string = this.fusionChartJson.raceFusionTable[row][col];
 
                 // Set the .raceA.raceB property of the parsed fusion table
-                if (!chart[raceA]) {
-                    chart[raceA] = {};
-                }
-                chart[raceA][raceB] = raceC;
+                for (const chart of chartsToUpdate) {
+                    if (!chart[raceA]) {
+                        chart[raceA] = {};
+                    }
+                    chart[raceA][raceB] = raceC;
 
-                // Set the .raceB.raceA property of the parsed fusion table
-                if (!chart[raceB]) {
-                    chart[raceB] = {};
+                    // Set the .raceB.raceA property of the parsed fusion table
+                    if (!chart[raceB]) {
+                        chart[raceB] = {};
+                    }
+                    chart[raceB][raceA] = raceC;
                 }
-                chart[raceB][raceA] = raceC;
             }
         }
 
