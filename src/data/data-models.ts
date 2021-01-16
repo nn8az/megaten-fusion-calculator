@@ -4,7 +4,7 @@ export class Demon {
     lvl: number;
     race: string;
     rank: number = 0;
-    uniqueRecipe: boolean = false;
+    specialRecipe: boolean = false;
     stats: number[] = [];
     static statsName: string[] = [];
 

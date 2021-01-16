@@ -19,11 +19,20 @@ const theme = createMuiTheme({
 });
 
 function loadDesu2DemonCompendium(callback: (demonCompendium: DemonCompendium) => void): void {
-  const demonListJsonPromise = import("./desu2/demons.json").then(importedJson => importedJson.default);
+  const demonJsonPromise = import("./desu2/demons.json").then(importedJson => importedJson.default);
   const fusionChartJsonPromise = import("./desu2/fusion-chart.json").then(importedJson => importedJson.default);
   const presetJsonPromise = import("./desu2/presets.json").then(importedJson => importedJson.default);
-  Promise.all([demonListJsonPromise, fusionChartJsonPromise, presetJsonPromise]).then(loadedJsons => {
+  Promise.all([demonJsonPromise, fusionChartJsonPromise, presetJsonPromise]).then(loadedJsons => {
     const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], loadedJsons[2]);
+    callback(newDemonCompendium);
+  })
+}
+
+function loadPersona4GoldenDemonCompendium(callback: (demonCompendium: DemonCompendium) => void): void {
+  const demonJsonPromise = import("./p4g/demons.json").then(importedJson => importedJson.default);
+  const fusionChartJsonPromise = import("./p4g/fusion-chart.json").then(importedJson => importedJson.default);
+  Promise.all([demonJsonPromise, fusionChartJsonPromise]).then(loadedJsons => {
+    const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1]);
     callback(newDemonCompendium);
   })
 }
@@ -33,7 +42,7 @@ export default function App(): JSX.Element {
 
   useEffect(()=>{
     if (!demonCompendium) {
-      loadDesu2DemonCompendium(setDemonCompendium);
+      loadPersona4GoldenDemonCompendium(setDemonCompendium);
     }
   }, [demonCompendium]);
 
