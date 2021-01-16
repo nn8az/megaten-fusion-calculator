@@ -49,8 +49,6 @@ export class DemonCompendium {
         this.prepRaceLvlInfo();
         
         this.parsePresets();
-
-        this.testFuseDemonWithAll("Suparna");
     }
 
     public getDemonById(id: number): Models.Demon | undefined {
