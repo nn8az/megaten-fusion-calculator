@@ -31,16 +31,26 @@ export class FusedDemon {
         return this.ingredients.length > 0;
     }
 
-    public toBaseIngredientSearchString(): string {
-        let str: string = "";
+    public getBaseIngredients(): { [id: number]: Demon } {
         if (this.ingredients) {
+            let ret: { [id: number]: Demon } = {};
             for (const ingDemon of this.ingredients) {
-                str += ingDemon.toBaseIngredientSearchString();
+                ret = {...ret, ...ingDemon.getBaseIngredients()};
             }
-            return str;
+            return ret;
         } else {
-            return this.demon.name;
+            const ret: { [id: number]: Demon } = {};
+            ret[this.demon.id] = this.demon;
+            return ret;
         }
+    }
+
+    public toBaseIngredientsIdCode(): string {
+        return Object.keys(this.getBaseIngredients()).join("-");
+    }
+
+    public toBaseIngredientSearchString(): string {
+        return Object.values(this.getBaseIngredients()).map(demon => demon.name).join(" ");
     }
 
     public isWeakerThanIngredients(): boolean {
