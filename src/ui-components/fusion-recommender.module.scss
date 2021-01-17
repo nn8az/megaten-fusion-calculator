@@ -1,15 +1,15 @@
 .fusionRecommender {
-    .addDemonsAndCalcResetButtonContainer {
+    .addDemonsAndButtonsRowContainer {
         display: inline-flex;
         flex-direction: column;
     }
 
-    .calcResetButtonContainer {
+    .buttonsRow {
         display: inline-flex;
         margin-top: 20px;
     }
 
-    .calcResetButtonContainer > button {
+    .buttonsRow > button {
         height: 60px;
     }
 
@@ -41,6 +41,17 @@
             100% {
                 background-position-x: 140%;
             }
+        }
+    }
+
+    $settings-button-color: rgb(83, 83, 83);
+    .settingsButton {
+        margin-right: 6px;
+        background-color: $settings-button-color;
+        flex-grow: 0.5;
+
+        &:hover {
+            background-color: lighten($color: $settings-button-color, $amount: 10);
         }
     }
 

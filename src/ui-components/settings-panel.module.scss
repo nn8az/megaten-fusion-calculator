@@ -1,0 +1,44 @@
+.settingsPanel {
+    margin: 10px 0 10px 40px;
+
+    :global(.MuiOutlinedInput-input) {
+        padding: 5px;
+    }
+
+    .settingsLine {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+
+        &::before{
+            content: "•";
+            margin-right: 3px;
+        }
+
+        &.numberSettings {
+            display: flex;
+            align-items: baseline;
+        }
+    }
+
+    .numberFieldLabel::after {
+        content: ":";
+        margin-right: 5px;
+    }
+
+    // MUI checkboxes
+    :global(.PrivateSwitchBase-root-5) {
+        padding: 0;
+    }
+
+    // MUI form label container
+    :global(.MuiFormControlLabel-root) {
+        margin: 0,
+    }
+
+    // MUI form label text
+    :global(.MuiFormControlLabel-label) {
+        font-size: 14px;
+    }
+}

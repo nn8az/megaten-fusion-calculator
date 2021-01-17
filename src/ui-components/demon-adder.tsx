@@ -101,7 +101,15 @@ function AddByLevelRange(params: {
 
     function onKeyPress(event: KeyboardEvent<HTMLDivElement>): void {
         const {key} = event;
-        if (key === "-" || key === "+" || key === ".") {
+        const acceptedKeys: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        let keyIsAccepted: boolean = false;
+        for (const acceptedKey of acceptedKeys) {
+            if (key === acceptedKey) {
+                keyIsAccepted = true;
+                break;
+            }
+        }
+        if (!keyIsAccepted) {
             event.preventDefault();
             event.stopPropagation();
         }
