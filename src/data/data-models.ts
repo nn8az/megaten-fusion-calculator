@@ -19,38 +19,24 @@ export class Demon {
 
 export class FusedDemon {
     demon: Demon;
-    ingredientA?: FusedDemon;
-    ingredientB?: FusedDemon;
+    ingredients?: FusedDemon[];
 
-    constructor(demon: Demon, ingredientA?: FusedDemon, ingredientB?: FusedDemon) {
+    constructor(demon: Demon, ingredients?: FusedDemon[]) {
         this.demon = demon;
-        this.ingredientA = ingredientA;
-        this.ingredientB = ingredientB;
+        this.ingredients = ingredients;
     }
 
     public isFused(): boolean {
-        return this.ingredientA !== undefined && this.ingredientB !== undefined;
-    }
-
-    public toRecipeString(): string {
-        let str: string = "";
-        const separator: string = " | ";
-        if (this.ingredientA && this.ingredientB) {
-            const strA: string = this.ingredientA.toRecipeString();
-            if (strA) { if (str) {str += separator} str += strA };
-            const strB: string = this.ingredientB.toRecipeString();
-            if (strB) { if (str) {str += separator} str += strB };
-            if (str) {str += separator}
-            str += this.ingredientA.demon.name + " + " + this.ingredientB.demon.name + " = " + this.demon.name;
-        }
-        return str;
+        if (!this.ingredients) { return false; }
+        return this.ingredients.length > 0;
     }
 
     public toBaseIngredientSearchString(): string {
         let str: string = "";
-        if (this.ingredientA && this.ingredientB) {
-            str += this.ingredientA.toBaseIngredientSearchString();
-            str += this.ingredientB.toBaseIngredientSearchString();
+        if (this.ingredients) {
+            for (const ingDemon of this.ingredients) {
+                str += ingDemon.toBaseIngredientSearchString();
+            }
             return str;
         } else {
             return this.demon.name;
@@ -63,11 +49,11 @@ export class FusedDemon {
 
     private getHighestIngredientLvl(): number {
         let lvl: number = 0;
-        if (this.ingredientA && this.ingredientB) {
-            let matLvlA: number = this.ingredientA.getHighestIngredientLvl();
-            if (matLvlA > lvl) { lvl = matLvlA; }
-            let matLvlB: number = this.ingredientB.getHighestIngredientLvl();
-            if (matLvlB > lvl) { lvl = matLvlB };
+        if (this.ingredients) {
+            for (const ingDemon of this.ingredients) {
+                let highestIngLvl: number = ingDemon.getHighestIngredientLvl();
+                if (highestIngLvl > lvl) { lvl = highestIngLvl; }
+            }
             return lvl;
         } else {
             return this.demon.lvl;
@@ -86,4 +72,4 @@ export class DemonsPreset {
 }
 
 export type IngredientDemons = {[demonId: number]: boolean};
-export type FusionResults = { [ingredientCount: number]: { [demonName: string]: FusedDemon[] } };
+export type FusionResults = { [ingredientCount: number]: { [id: string]: FusedDemon[] } };

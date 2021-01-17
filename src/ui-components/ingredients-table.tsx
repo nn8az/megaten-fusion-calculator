@@ -20,7 +20,7 @@ export default function FusionIngredientsTable(params: {
   const columns: ColDef[] = [
     { field: "name", headerName: "Demon", flex: 1, resizable: false },
     { field: "lvl", headerName: "Level", width: 70, headerAlign: "center", resizable: false, disableColumnMenu: true },
-    { field: "race", headerName: "Race", width: 70, headerAlign: "center", resizable: false, disableColumnMenu: true },
+    { field: "race", headerName: "Race", width: 100, headerAlign: "center", resizable: false, disableColumnMenu: true },
     { field: "remove", headerName: " ", width: 50, sortable: false, disableColumnMenu: true, renderCell: createRemoveButtonForCell }
   ]
 
@@ -61,7 +61,7 @@ export default function FusionIngredientsTable(params: {
   }, []);
 
   return (
-    <div style={{ maxWidth: "500px" }} ref={gridWrapperRef}>
+    <div style={{ maxWidth: "600px" }} ref={gridWrapperRef}>
       <DataGrid
         rows={ingredientsAsRowsArray}
         columns={columns}

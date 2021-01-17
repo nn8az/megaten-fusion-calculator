@@ -15,21 +15,25 @@ function renderDemonName(demon: Models.FusedDemon): JSX.Element {
 }
 
 function renderRecipe(demon: Models.FusedDemon): JSX.Element {
-    let ret: JSX.Element = <React.Fragment/>;
-    if (demon.ingredientA && demon.ingredientB) {
-        ret = <React.Fragment>{ret}{renderRecipe(demon.ingredientA)}</React.Fragment>;
-        ret = <React.Fragment>{ret}{renderRecipe(demon.ingredientB)}</React.Fragment>;
-        const nameA = renderDemonName(demon.ingredientA);
-        const nameB = renderDemonName(demon.ingredientB);
+    let priorRecipes: JSX.Element = <React.Fragment/>;
+    if (demon.ingredients) {
+        let curRecipe: JSX.Element = <React.Fragment/>;
+        let isFirstLoop: boolean = true;
+        for (const ingDemon of demon.ingredients) {
+            priorRecipes = <React.Fragment>{priorRecipes}{renderRecipe(ingDemon)}</React.Fragment>;
+            const separator = isFirstLoop ? undefined : <React.Fragment> + </React.Fragment>;
+            curRecipe = <React.Fragment>{curRecipe}{separator}{renderDemonName(ingDemon)}</React.Fragment>
+            isFirstLoop = false;
+        }
         const nameR = renderDemonName(demon);
         return <React.Fragment>
-            {ret}
+            {priorRecipes}
             <div className={styles.recipeLine}>
-                {nameA} + {nameB} = {nameR}
+                {curRecipe} = {nameR}
             </div>
         </React.Fragment>;
     }
-    return ret;
+    return priorRecipes;
 }
 
 function renderRecipeWrapper(cellParams: CellParams): JSX.Element {
@@ -63,8 +67,8 @@ export default function FusionResultTable(params: {
     const ingredientsAsRowsArray = [];
     for (const size in fusionResults) {
         if (Number(size) === 1) { continue; }
-        for (const demonName in fusionResults[size]) {
-            for (const fusedDemon of fusionResults[size][demonName]) {
+        for (const demonId in fusionResults[size]) {
+            for (const fusedDemon of fusionResults[size][demonId]) {
                 const {demon} = fusedDemon;
                 const demonRow: any = {
                     "id": 0,

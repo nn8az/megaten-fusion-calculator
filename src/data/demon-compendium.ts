@@ -28,8 +28,8 @@ export class DemonCompendium {
     private tripleFusionChart: { [race: string]: { [race: string]: string } } = {}; 
     private demonsPresets: Models.DemonsPreset[] = [];
     private gameHasElements: boolean = false;
-    private usePersonaSameRaceFusionMechanic: boolean = false;
-    private usePersonaTripleFusionMechanic: boolean = false;
+    private _usePersonaSameRaceFusionMechanic: boolean = false;
+    private _usePersonaTripleFusionMechanic: boolean = false;
     private disableSameDemonFusion: boolean = false;
 
     private idMap: { [demonId: number]: Models.Demon } = {}; // Maps id to a demon model object
@@ -65,6 +65,14 @@ export class DemonCompendium {
 
     public getDemonPresets(): Models.DemonsPreset[] {
         return this.demonsPresets;
+    }
+
+    public get usePersonaTripleFusionMechanic(): boolean {
+        return this._usePersonaTripleFusionMechanic;
+    }
+
+    public get usePersonaSameRaceFusionMechanic(): boolean {
+        return this._usePersonaSameRaceFusionMechanic;
     }
 
     public fuseDemons(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
@@ -182,14 +190,14 @@ export class DemonCompendium {
 
     private parseFusionChart(): void {
         if (this.fusionChartJson.elements && this.fusionChartJson.elements.length > 0) { this.gameHasElements = true; }
-        if (this.fusionChartJson.usePersonaSameRaceFusionMechanic) { this.usePersonaSameRaceFusionMechanic = true; }
-        if (this.fusionChartJson.usePersonaTripleFusionMechanic) { this.usePersonaTripleFusionMechanic = true; }
+        if (this.fusionChartJson.usePersonaSameRaceFusionMechanic) { this._usePersonaSameRaceFusionMechanic = true; }
+        if (this.fusionChartJson.usePersonaTripleFusionMechanic) { this._usePersonaTripleFusionMechanic = true; }
         if (this.fusionChartJson.disableSameDemonFusion) { this.disableSameDemonFusion = true; }
 
         for (let row: number = 0; row < this.fusionChartJson.raceFusionTable.length; row++) {
             for (let col: number = 0; col < this.fusionChartJson.raceFusionTable[row].length; col++) {
                 const chartsToUpdate = [];
-                if (this.usePersonaTripleFusionMechanic) {
+                if (this._usePersonaTripleFusionMechanic) {
                     if (col < row) {
                         chartsToUpdate.push(this.tripleFusionChart);
                     } else if (col === row) {
@@ -351,7 +359,7 @@ export class DemonCompendium {
             const elementNameR: string | undefined = this.getFusionRace(demonA.race, demonB.race);
             if (!elementNameR) { return undefined; }
             return this.getDemonByName(elementNameR);
-        } else if (this.usePersonaSameRaceFusionMechanic) {
+        } else if (this._usePersonaSameRaceFusionMechanic) {
             const resultLvlTable = this.getLvlTableForRace(demonB.race, true).filter(lvl => lvl !== demonA.lvl);
             let resultLvlIndex = -1;
             for (const resultLvl of resultLvlTable) {

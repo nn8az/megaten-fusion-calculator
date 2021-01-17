@@ -15,7 +15,171 @@ import ReplayIcon from '@material-ui/icons/Replay';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import styles from './fusion-recommender.module.scss';
 
-const MAX_FUSION_INGREDIENT = 3;
+const MAX_FUSION_INGREDIENT = 4;
+
+function calculateAllFusionCombinations(ingredients: Models.IngredientDemons, demonCompendium: DemonCompendium): Models.FusionResults {
+  const myFusionResults: Models.FusionResults = {};
+  for (let size = 1; size <= MAX_FUSION_INGREDIENT; size++) {
+    myFusionResults[size] = {};
+  }
+
+  for (const demonId in ingredients) {
+    const demon: Models.Demon | undefined = demonCompendium.getDemonById(Number(demonId));
+    if (!demon) { continue; }
+    const fusedDemon: Models.FusedDemon = new Models.FusedDemon(demon);
+    if (!myFusionResults[1][demon.id]) {
+      myFusionResults[1][demon.id] = [];
+    }
+    myFusionResults[1][demon.id].push(fusedDemon);
+  }
+
+  for (let ingCountR = 2; ingCountR <= MAX_FUSION_INGREDIENT; ingCountR++) {
+    for (let ingCountA = ingCountR - 1; ingCountA >= (ingCountR / 2); ingCountA--) {
+      const ingCountB: number = ingCountR - ingCountA;
+      const speciesUsedAsA: { [id: number]: boolean } = {}; // id of the demon species that have already been used in the calculation as demon A
+      for (const idA in myFusionResults[ingCountA]) {
+        if (myFusionResults[ingCountA][idA].length === 0) { continue; }
+        const speciesA: Models.Demon = myFusionResults[ingCountA][idA][0].demon;
+        for (const idB in myFusionResults[ingCountB]) {
+          if (myFusionResults[ingCountB][idB].length === 0) { continue; }
+          const speciesB: Models.Demon = myFusionResults[ingCountB][idB][0].demon;
+
+          // skip calculating fusions that should have already been calculated since A+B produces the same results as B+A
+          if (speciesUsedAsA[speciesB.id]) { continue; }
+
+          const speciesR: Models.Demon | undefined = demonCompendium.fuseDemons(speciesA, speciesB);
+          if (!speciesR) { continue; }
+          if (!postSpeciesFusionCheck(myFusionResults, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
+
+          const resultFusedDemons: Models.FusedDemon[] = crossFuseIngredients(speciesR, myFusionResults[ingCountA][idA], myFusionResults[ingCountB][idB]);
+          if (!myFusionResults[ingCountR][speciesR.id]) { myFusionResults[ingCountR][speciesR.id] = []; }
+          for (const fusedDemon of resultFusedDemons) {
+            myFusionResults[ingCountR][speciesR.id].push(fusedDemon);
+          }
+        }
+        speciesUsedAsA[speciesA.id] = true;
+      }
+    }
+
+    if (demonCompendium.usePersonaTripleFusionMechanic) {
+      calculateTripleFusionCombinations(ingredients, demonCompendium, myFusionResults, ingCountR);
+    }
+  }
+
+  // Re-traverse the entire results and fully purge fusion recipes that produce demons of lower level
+  for (const ingCount in myFusionResults) {
+    if (Number(ingCount) === 1) { continue; }
+    for (const id in myFusionResults[ingCount]) {
+      const demonAry: Models.FusedDemon[] = myFusionResults[ingCount][id];
+      const filteredDemonAry = demonAry.filter((demon) => { return !demon.isWeakerThanIngredients() })
+      myFusionResults[ingCount][id] = filteredDemonAry;
+    }
+  }
+
+  return myFusionResults;
+}
+
+function calculateTripleFusionCombinations(ingredients: Models.IngredientDemons, demonCompendium: DemonCompendium, fusionResults: Models.FusionResults, ingCountR: number): void {
+  let ingCounts: number[] = [];
+  while (getNextTripleFusionIngCounts(ingCounts, ingCountR)) {
+    const [ingCountA, ingCountB, ingCountC] = ingCounts;
+    const alreadyCalculatedAsA: { [id: number]: boolean } = {};
+    for (const idA in fusionResults[ingCountA]) {
+      if (fusionResults[ingCountA][idA].length === 0) { continue; }
+      const speciesA: Models.Demon = fusionResults[ingCountA][idA][0].demon;
+
+      const alreadyCalculatedAsB: { [id: number]: boolean } = {};
+      for (const idB in fusionResults[ingCountB]) {
+        if (alreadyCalculatedAsA[Number(idB)]) { continue; }
+        if (fusionResults[ingCountB][idB].length === 0) { continue; }
+        const speciesB: Models.Demon = fusionResults[ingCountB][idB][0].demon;
+
+        for (const idC in fusionResults[ingCountC]) {
+          if (alreadyCalculatedAsA[Number(idC)]) { continue; }
+          if (alreadyCalculatedAsB[Number(idC)]) { continue; }
+          if (fusionResults[ingCountC][idC].length === 0) { continue; }
+          const speciesC: Models.Demon = fusionResults[ingCountC][idC][0].demon;
+          const speciesR: Models.Demon | undefined = demonCompendium.tripleFuseDemons(speciesA, speciesB, speciesC);
+          if (!speciesR) { continue; }
+          if (!postSpeciesFusionCheck(fusionResults, speciesR, ingCountR, [speciesA, speciesB, speciesC])) { continue; }
+          const resultFusedDemons: Models.FusedDemon[] = crossFuseIngredients(speciesR, fusionResults[ingCountA][idA], fusionResults[ingCountB][idB], fusionResults[ingCountC][idC]);
+          if (!fusionResults[ingCountR][speciesR.id]) { fusionResults[ingCountR][speciesR.id] = []; }
+          for (const fusedDemon of resultFusedDemons) {
+            fusionResults[ingCountR][speciesR.id].push(fusedDemon);
+          }
+        }
+        alreadyCalculatedAsB[speciesB.id] = true;
+      }
+      alreadyCalculatedAsA[speciesA.id] = true;
+    }
+  }
+}
+
+function getNextTripleFusionIngCounts(fusionIngCounts: number[], ingCountR: number): boolean {
+  if (ingCountR < 3) { return false; }
+  if (fusionIngCounts.length < 3) { 
+    fusionIngCounts[0] = ingCountR - 2;
+    fusionIngCounts[1] = 1;
+    fusionIngCounts[2] = 1;
+    return true;
+  }
+  for (let i = fusionIngCounts.length - 2; i >= 0; i--) {
+    const j: number = i + 1;
+    if (fusionIngCounts[i] - fusionIngCounts[j] >= 2) {
+      fusionIngCounts[i] = fusionIngCounts[i] - 1;
+      fusionIngCounts[j] = fusionIngCounts[j] + 1;
+      return true;
+    }
+  }
+  return false;
+}
+
+function postSpeciesFusionCheck(fusionResults: Models.FusionResults, speciesR: Models.Demon, ingCountR: number, speciesIngs: Models.Demon[]): boolean {
+  // throw out inefficient fusions that the user can already make using fewer ingredients
+  let canBeMadeWithLessIngredient: boolean = false;
+  for (let sizeCheck = ingCountR - 1; sizeCheck >= 1; sizeCheck--) {
+    if (fusionResults[sizeCheck][speciesR.id]) {
+      canBeMadeWithLessIngredient = true;
+      break;
+    }
+  }
+  if (canBeMadeWithLessIngredient) { return false; }
+
+  // if this is the final round of fusions, throw out fusions that produce demons that are lower level 
+  if (ingCountR === MAX_FUSION_INGREDIENT) {
+    for (const speciesIng of speciesIngs) {
+      if (speciesR.lvl < speciesIng.lvl) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function crossFuseIngredients(resultSpecies: Models.Demon, ...ingredients: Models.FusedDemon[][]): Models.FusedDemon[] {
+  const indeces: number[] = [];
+  const ret: Models.FusedDemon[] = [];
+  for (let i = 0; i < ingredients.length; i++) { indeces.push(0); }
+  while (true) {
+    const fusedDemonIngredientsHistory: Models.FusedDemon[] = [];
+    for (let i = 0; i < ingredients.length; i++) {
+      fusedDemonIngredientsHistory.push(ingredients[i][indeces[i]]);
+    }
+    ret.push(new Models.FusedDemon(resultSpecies, fusedDemonIngredientsHistory));
+
+    // Increment the indeces
+    let hasCarry: boolean = true;
+    for (let i = indeces.length - 1; i >= 0; i--) {
+      let index: number = indeces[i];
+      if (hasCarry) { index = index + 1; hasCarry = false; }
+      if (index >= ingredients[i].length) { index = 0; hasCarry = true; }
+      indeces[i] = index;
+      if (!hasCarry) { break; }
+    }
+    if (hasCarry) { break; }
+  }
+  return ret;
+}
 
 function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.Element {
   const { demonCompendium } = params;
@@ -48,85 +212,8 @@ function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.El
     setResetterKey((resetterKey + 1) % 2);
   }
 
-  function calculateAllFusionCombinations(): void {
-    const myFusionResults: Models.FusionResults = {};
-    for (let size = 1; size <= MAX_FUSION_INGREDIENT; size++) {
-      myFusionResults[size] = {};
-    }
-
-    for (const demonId in ingredients) {
-      const demon: Models.Demon | undefined = demonCompendium.getDemonById(Number(demonId));
-      if (!demon) { continue; }
-      const fusedDemon: Models.FusedDemon = new Models.FusedDemon(demon);
-      if (!myFusionResults[1][demon.name]) {
-        myFusionResults[1][demon.name] = [];
-      }
-      myFusionResults[1][demon.name].push(fusedDemon);
-    }
-
-    for (let fusMatCount = 2; fusMatCount <= MAX_FUSION_INGREDIENT; fusMatCount++) {
-      for (let matCountA = fusMatCount - 1; matCountA >= (fusMatCount / 2); matCountA--) {
-        const matCountB: number = fusMatCount - matCountA;
-        const speciesUsedAsA: { [id: number]: boolean } = {}; // id of the demon species that have already been used in the calculation as demon A
-        for (const nameA in myFusionResults[matCountA]) {
-          if (myFusionResults[matCountA][nameA].length === 0) { continue; }
-          const speciesA: Models.Demon = myFusionResults[matCountA][nameA][0].demon;
-          for (const nameB in myFusionResults[matCountB]) {
-            if (myFusionResults[matCountB][nameB].length === 0) { continue; }
-            const speciesB: Models.Demon = myFusionResults[matCountB][nameB][0].demon;
-
-            // skip calculating fusions that should have already been calculated since A+B produces the same results as B+A
-            if (speciesUsedAsA[speciesB.id]) { continue; }
-
-            const speciesR: Models.Demon | undefined = demonCompendium.fuseDemons(speciesA, speciesB);
-            if (!speciesR) { continue; }
-
-            // throw out inefficient fusions that the user can already make using fewer ingredients
-            let canBeMadeWithLessIngredient: boolean = false;
-            for (let sizeCheck = fusMatCount - 1; sizeCheck >= 1; sizeCheck--) {
-              if (myFusionResults[sizeCheck][speciesR.name]) {
-                canBeMadeWithLessIngredient = true;
-                break;
-              }
-            }
-            if (canBeMadeWithLessIngredient) { continue; }
-
-            // if this is the final round of fusions, throw out fusions that produce demons that are lower level 
-            if (fusMatCount === MAX_FUSION_INGREDIENT && (speciesA.lvl > speciesR.lvl || speciesB.lvl > speciesR.lvl)) { continue; }
-
-            for (const demonA of myFusionResults[matCountA][nameA]) {
-              for (const demonB of myFusionResults[matCountB][nameB]) {
-                const demonR = new Models.FusedDemon(speciesR, demonA, demonB);
-                if (!myFusionResults[fusMatCount][speciesR.name]) {
-                  myFusionResults[fusMatCount][speciesR.name] = [];
-                }
-                myFusionResults[fusMatCount][speciesR.name].push(demonR);
-              }
-            }
-          }
-          speciesUsedAsA[speciesA.id] = true;
-        }
-      }
-    }
-
-    // Re-traverse the entire results and fully purge fusions that produce demons of lower level
-    for (const fusionMatCount in myFusionResults) {
-      if (Number(fusionMatCount) === 1) { continue; }
-      for (const name in myFusionResults[fusionMatCount]) {
-        const demonAry: Models.FusedDemon[] = myFusionResults[fusionMatCount][name];
-        const filteredDemonAry = demonAry.filter((demon) => { return !demon.isWeakerThanIngredients() })
-        myFusionResults[fusionMatCount][name] = filteredDemonAry;
-      }
-    }
-
-    setFusionResults(myFusionResults);
-
-    // Scroll to the fusion result section by using a setTimeout() so it can happen after the section is rendered
-    setTimeout(()=>{
-      if (fusionResultSectionHeader.current != null) {
-        fusionResultSectionHeader.current.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"});
-      }
-    })
+  function onCalculateButtonClick(): void {
+    setFusionResults(calculateAllFusionCombinations(ingredients, demonCompendium));
   }
 
   return (
@@ -135,7 +222,7 @@ function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.El
       <div className={styles.addDemonsAndCalcResetButtonContainer}>
         <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredients} />
         <div className={styles.calcResetButtonContainer}>
-          <Button className={styles.calculateButton} variant="outlined" onClick={calculateAllFusionCombinations} disabled={Object.keys(ingredients).length === 0} ><PlayArrowIcon />Calculate</Button>
+          <Button className={styles.calculateButton} variant="outlined" onClick={onCalculateButtonClick} disabled={Object.keys(ingredients).length === 0} ><PlayArrowIcon />Calculate</Button>
           <Button className={styles.resetButton} variant="outlined" onClick={onResetButtonClick}><ReplayIcon />Reset</Button>
         </div>
       </div>
