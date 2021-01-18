@@ -81,5 +81,6 @@ export class DemonsPreset {
     }
 }
 
-export type Ingredients = {[demonId: number]: boolean};
+export type Ingredients = { [demonId: number]: boolean };
+export type IngredientsSettings = { [demonId: number]: { mustUse: boolean, multipleUse: boolean } };
 export type FusionResults = { [ingredientCount: number]: { [id: string]: FusedDemon[] } };

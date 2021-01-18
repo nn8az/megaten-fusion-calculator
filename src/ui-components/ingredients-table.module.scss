@@ -1,0 +1,50 @@
+.ingredientsTableContainer {
+    display: inline-block;
+    padding: 2px;
+    
+    .ingredientsTable {
+        
+        :global(.MuiTable-root) {
+            width: auto;
+        }
+
+        :global(.MuiTableCell-root) {
+            padding: 3px 5px;
+        }
+
+        .ingredientsTableHeader {
+            background-color: rgba(black, 0.5);
+        }
+
+        .ingredientsTableBody {
+            > tr:nth-child(even) {
+                background-color: rgba(black, 0.3);
+            }
+        }
+
+        .checkBox {
+            padding: 0;
+        }
+
+        .removeDemonButton {
+            padding: 0;
+        }
+
+        .removeDemonButtonIcon {
+            color: palevioletred;
+        }
+
+        // MUI Pagination
+        :global(.MuiTablePagination-toolbar) {
+            flex-direction: column-reverse;
+        }
+
+        :global(.MuiTablePagination-spacer) {
+            display: none;
+        }
+
+        :global(.MuiTablePagination-actions) {
+            margin: 0;
+        }
+    }
+}

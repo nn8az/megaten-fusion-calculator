@@ -7,7 +7,7 @@ import { DemonCompendium } from '../data/demon-compendium';
 
 // Imports for UI components
 import Button from '@material-ui/core/Button';
-import FusionIngredientsDataGrid from './ingredients-datagrid';
+import FusionIngredientsTable from './ingredients-table';
 import FusionResultDataGrid from './fusion-result-datagrid';
 import SettingsPanel, { Settings } from './settings-panel';
 import DemonAdder from './demon-adder';
@@ -192,6 +192,7 @@ function removeDemonFromIngredients(demonId: number): void {
   delete newIngredients[demonId];
   setIngredients(newIngredients);
 }
+let ingredientsSettings: Models.IngredientsSettings = {};
 let settings: Settings;
 
 export default function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.Element {
@@ -222,11 +223,13 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
 
   function onSettingsButtonClick(): void {
     setSettingsIsVisible(!settingsIsVisible);
+    console.log(ingredientsSettings);
   }
 
   function onResetButtonClick(): void {
     const newIngredients = {};
     setIngredients(newIngredients);
+    ingredientsSettings = {};
 
     const newFusionResults = {};
     setFusionResults(newFusionResults);
@@ -247,7 +250,11 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
       </div>
       <SettingsPanel key={resetterKey} visible={settingsIsVisible} settings={settings} />
       <h2>Fusion Ingredients</h2>
-      <FusionIngredientsDataGrid demonCompendium={demonCompendium} ingredients={ingredients} onRemoveIngredient={removeDemonFromIngredients} />
+      <FusionIngredientsTable 
+        demonCompendium={demonCompendium}
+        ingredients={ingredients}
+        ingredientsSettings={ingredientsSettings}
+        onRemoveIngredient={removeDemonFromIngredients} />
       <h2 ref={fusionResultSectionHeader}>Results</h2>
       <FusionResultDataGrid fusionResults={fusionResults} />
     </div>
