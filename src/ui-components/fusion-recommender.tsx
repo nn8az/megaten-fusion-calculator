@@ -19,7 +19,7 @@ import styles from './fusion-recommender.module.scss';
 
 const MAX_FUSION_INGREDIENT_HARD_CAP = 7;
 
-function calculateAllFusionCombinations(ingredients: Models.IngredientDemons, demonCompendium: DemonCompendium, settings: Settings): Models.FusionResults {
+function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings): Models.FusionResults {
   const myFusionResults: Models.FusionResults = {};
   for (let size = 1; size <= settings.maxIngredient && size <= MAX_FUSION_INGREDIENT_HARD_CAP; size++) {
     myFusionResults[size] = {};
@@ -81,7 +81,7 @@ function calculateAllFusionCombinations(ingredients: Models.IngredientDemons, de
   return myFusionResults;
 }
 
-function calculateTripleFusionCombinations(ingredients: Models.IngredientDemons, demonCompendium: DemonCompendium, settings: Settings, fusionResults: Models.FusionResults, ingCountR: number): void {
+function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings, fusionResults: Models.FusionResults, ingCountR: number): void {
   let ingCounts: number[] = [];
   while (getNextTripleFusionIngCounts(ingCounts, ingCountR)) {
     const [ingCountA, ingCountB, ingCountC] = ingCounts;
@@ -185,15 +185,26 @@ function crossFuseIngredients(resultSpecies: Models.Demon, ...ingredients: Model
   return ret;
 }
 
+let ingredients: Models.Ingredients;
+let setIngredients: React.Dispatch<React.SetStateAction<Models.Ingredients>>;
+function removeDemonFromIngredients(demonId: number): void {
+  const newIngredients = { ...ingredients };
+  delete newIngredients[demonId];
+  setIngredients(newIngredients);
+}
+let settings: Settings;
+
 export default function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.Element {
   const { demonCompendium } = params;
-  let [ingredients, setIngredients] = useState<Models.IngredientDemons>({});
+  [ingredients, setIngredients] = useState<Models.Ingredients>({});
   let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
   let [settingsIsVisible, setSettingsIsVisible] = useState<boolean>(false);
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
-  
-  let settings = new Settings();
-  settings.useTripleFusion = demonCompendium.usePersonaTripleFusionMechanic ? true : undefined;
+  if (!settings) {
+    settings = new Settings();
+    settings.useTripleFusion = demonCompendium.usePersonaTripleFusionMechanic;
+    settings.useTripleFusionSettingIsVisible = demonCompendium.usePersonaTripleFusionMechanic;
+  }
 
   const fusionResultSectionHeader = useRef<HTMLHeadingElement>(null);
 
@@ -204,12 +215,6 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
     }
     setIngredients(newIngredients);
   };
-
-  function removeDemonFromIngredients(demonId: number): void {
-    const newIngredients = { ...ingredients };
-    delete newIngredients[demonId];
-    setIngredients(newIngredients);
-  }
 
   function onCalculateButtonClick(): void {
     setFusionResults(calculateAllFusionCombinations(ingredients, demonCompendium, settings));
@@ -226,7 +231,6 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
     const newFusionResults = {};
     setFusionResults(newFusionResults);
 
-    console.log(settings);
     setResetterKey((resetterKey + 1) % 2);
   }
   
@@ -245,7 +249,7 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
       <h2>Fusion Ingredients</h2>
       <FusionIngredientsTable demonCompendium={demonCompendium} ingredients={ingredients} onRemoveIngredient={removeDemonFromIngredients} />
       <h2 ref={fusionResultSectionHeader}>Results</h2>
-      <FusionResultTable demonCompendium={demonCompendium} fusionResults={fusionResults} />
+      <FusionResultTable fusionResults={fusionResults} />
     </div>
   );
 }

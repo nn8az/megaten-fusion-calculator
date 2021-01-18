@@ -9,11 +9,13 @@ import styles from './settings-panel.module.scss';
 export class Settings {
     charLvl: number = 99;
     maxIngredient: number = 3;
-    useTripleFusion?: boolean;
+    useTripleFusion: boolean = false;
+
+    useTripleFusionSettingIsVisible: boolean = false;
 }
 
 export default function SettingsPanel(params: { visible: boolean, settings: Settings }) : JSX.Element {
-    const {visible, settings} = params;
+    const {visible, settings } = params;
     const [charLvlFieldValue, setCharLvlFieldValue] = useState<number | string>(settings.charLvl);
     const [maxIngFieldValue, setMaxIngFieldValue] = useState<number | string>(settings.maxIngredient);
 
@@ -47,9 +49,9 @@ export default function SettingsPanel(params: { visible: boolean, settings: Sett
             emptyFieldValue={3}
             fieldStateValueAndSetter={[maxIngFieldValue, setMaxIngFieldValue]}
             onSetSettings={onSetMaxIng} />
-        {settings.useTripleFusion !== undefined ?
+        {settings.useTripleFusionSettingIsVisible ?
             <CheckboxSettings
-                label="Allow triple fusion?"
+                label="Allow triple fusion"
                 checked={settings.useTripleFusion}
                 onSetSettings={onSetUseTripleFusion}
             /> : undefined}

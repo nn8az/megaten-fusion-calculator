@@ -10,11 +10,11 @@ import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 import styles from './ui-components.module.scss';
 
-export default function FusionIngredientsTable(params: {
+const FusionIngredientsTable = (params: {
   demonCompendium: DemonCompendium
-  ingredients: Models.IngredientDemons
+  ingredients: Models.Ingredients
   onRemoveIngredient?: (deletedId: number) => void;
-}): JSX.Element {
+}): JSX.Element => {
   const { demonCompendium, ingredients, onRemoveIngredient } = params;
 
   const columns: ColDef[] = [
@@ -74,3 +74,4 @@ export default function FusionIngredientsTable(params: {
     </div>
   );
 }
+export default React.memo(FusionIngredientsTable);
