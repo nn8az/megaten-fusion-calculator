@@ -10,7 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 import styles from './ui-components.module.scss';
 
-const FusionIngredientsTable = (params: {
+const FusionIngredientsDataGrid = (params: {
   demonCompendium: DemonCompendium
   ingredients: Models.Ingredients
   onRemoveIngredient?: (deletedId: number) => void;
@@ -74,4 +74,4 @@ const FusionIngredientsTable = (params: {
     </div>
   );
 }
-export default React.memo(FusionIngredientsTable);
+export default React.memo(FusionIngredientsDataGrid);

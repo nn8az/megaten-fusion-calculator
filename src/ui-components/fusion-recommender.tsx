@@ -7,8 +7,8 @@ import { DemonCompendium } from '../data/demon-compendium';
 
 // Imports for UI components
 import Button from '@material-ui/core/Button';
-import FusionIngredientsTable from './ingredients-table';
-import FusionResultTable from './fusion-result-table';
+import FusionIngredientsDataGrid from './ingredients-datagrid';
+import FusionResultDataGrid from './fusion-result-datagrid';
 import SettingsPanel, { Settings } from './settings-panel';
 import DemonAdder from './demon-adder';
 
@@ -247,9 +247,9 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
       </div>
       <SettingsPanel key={resetterKey} visible={settingsIsVisible} settings={settings} />
       <h2>Fusion Ingredients</h2>
-      <FusionIngredientsTable demonCompendium={demonCompendium} ingredients={ingredients} onRemoveIngredient={removeDemonFromIngredients} />
+      <FusionIngredientsDataGrid demonCompendium={demonCompendium} ingredients={ingredients} onRemoveIngredient={removeDemonFromIngredients} />
       <h2 ref={fusionResultSectionHeader}>Results</h2>
-      <FusionResultTable fusionResults={fusionResults} />
+      <FusionResultDataGrid fusionResults={fusionResults} />
     </div>
   );
 }

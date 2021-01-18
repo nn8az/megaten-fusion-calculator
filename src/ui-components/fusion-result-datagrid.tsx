@@ -43,7 +43,7 @@ function getRecipeAsString(valueParam: ValueGetterParams): string {
     return (valueParam.value as Models.FusedDemon).toBaseIngredientSearchString();
 }
 
-const FusionResultTable = (params: {
+const FusionResultDataGrid = (params: {
     fusionResults: Models.FusionResults
   }): JSX.Element => {
     const { fusionResults } = params;
@@ -113,4 +113,4 @@ const FusionResultTable = (params: {
         />
     );
   };
-  export default React.memo(FusionResultTable);
+  export default React.memo(FusionResultDataGrid);
