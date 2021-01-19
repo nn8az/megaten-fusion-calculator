@@ -96,7 +96,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
         )
     }
 
-    return <Paper className={styles.paperContainer} elevation={1}>
+    return <Paper className={styles.paperContainer} elevation={3}>
         <TableContainer className={styles.tableContainer}>
             <Table>
                 <TableHead className={styles.header}>

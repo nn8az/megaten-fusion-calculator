@@ -1,5 +1,14 @@
 .settingsPanel {
     margin: 10px 0 10px 40px;
+    overflow: hidden;
+    height: 150px;
+    transition: height 2s;
+
+    .paper {
+        background: none;
+        padding: 4px;
+        display: inline-block;
+    }
 
     :global(.MuiOutlinedInput-input) {
         padding: 5px;

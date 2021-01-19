@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Paper from '@material-ui/core/Paper';
 
 import styles from './scss/settings-panel.module.scss';
 
@@ -32,29 +33,31 @@ export default function SettingsPanel(params: { visible: boolean, settings: Sett
     }
 
     const settingsPanelStyle: React.CSSProperties = {};
-    if (!visible) { settingsPanelStyle.display = "none"; }
+    if (!visible) { settingsPanelStyle.height = "0px"; }
     return <div style={settingsPanelStyle} className={styles.settingsPanel}>
-        <h2>Settings</h2>
-        <NumberSettings
-            label="Character level"
-            min={1}
-            max={99}
-            emptyFieldValue={99}
-            fieldStateValueAndSetter={[charLvlFieldValue, setCharLvlFieldValue]}
-            onSetSettings={onSetCharLvl} />
-        <NumberSettings
-            label="Max ingredients per recipe"
-            min={2}
-            max={5}
-            emptyFieldValue={3}
-            fieldStateValueAndSetter={[maxIngFieldValue, setMaxIngFieldValue]}
-            onSetSettings={onSetMaxIng} />
-        {settings.useTripleFusionSettingIsVisible ?
-            <CheckboxSettings
-                label="Allow triple fusion"
-                checked={settings.useTripleFusion}
-                onSetSettings={onSetUseTripleFusion}
-            /> : undefined}
+        <Paper variant="outlined" className={styles.paper}>
+            <h2>Settings</h2>
+            <NumberSettings
+                label="Character level"
+                min={1}
+                max={99}
+                emptyFieldValue={99}
+                fieldStateValueAndSetter={[charLvlFieldValue, setCharLvlFieldValue]}
+                onSetSettings={onSetCharLvl} />
+            <NumberSettings
+                label="Max ingredients per recipe"
+                min={2}
+                max={5}
+                emptyFieldValue={3}
+                fieldStateValueAndSetter={[maxIngFieldValue, setMaxIngFieldValue]}
+                onSetSettings={onSetMaxIng} />
+            {settings.useTripleFusionSettingIsVisible ?
+                <CheckboxSettings
+                    label="Allow triple fusion"
+                    checked={settings.useTripleFusion}
+                    onSetSettings={onSetUseTripleFusion}
+                /> : undefined}
+        </Paper>
     </div>
 }
 

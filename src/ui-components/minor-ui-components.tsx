@@ -10,7 +10,7 @@ type WarningBannerProps = {
     message?: string;
 }
 const WarningBannerCore = (params: WarningBannerProps): JSX.Element => {
-    return <Paper elevation={1} className={styles.warningBanner} >
+    return <Paper className={styles.warningBanner} variant="outlined" >
         <WarningIcon className={styles.warningIcon} /><span>{params.message}</span>
     </Paper>
 }
