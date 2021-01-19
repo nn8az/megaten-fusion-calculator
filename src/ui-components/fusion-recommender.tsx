@@ -15,7 +15,7 @@ import DemonAdder from './demon-adder';
 import ReplayIcon from '@material-ui/icons/Replay';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SettingsIcon from '@material-ui/icons/Settings';
-import styles from './fusion-recommender.module.scss';
+import styles from './scss/fusion-recommender.module.scss';
 
 const MAX_FUSION_INGREDIENT_HARD_CAP = 7;
 

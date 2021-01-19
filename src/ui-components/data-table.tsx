@@ -10,7 +10,7 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
 
-import styles from './data-table.module.scss';
+import styles from './scss/data-table.module.scss';
 
 type StatePair<T> = [T, React.Dispatch<React.SetStateAction<T>>];
 export type CellProps = {

@@ -4,7 +4,7 @@ import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-import styles from './settings-panel.module.scss';
+import styles from './scss/settings-panel.module.scss';
 
 export class Settings {
     charLvl: number = 99;

@@ -8,7 +8,7 @@ import Button from '@material-ui/core/Button';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
 import AddIcon from '@material-ui/icons/Add';
-import styles from './ui-components.module.scss';
+import styles from './scss/ui-components.module.scss';
 
 export default function DemonAdder(params: {
     demonCompendium: DemonCompendium,

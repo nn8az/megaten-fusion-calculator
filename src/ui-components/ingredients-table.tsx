@@ -10,7 +10,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
 
-import styles from './ingredients-table.module.scss';
+import styles from './scss/ingredients-table.module.scss';
 
 //====================================================================================================
 
