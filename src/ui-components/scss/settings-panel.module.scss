@@ -1,12 +1,12 @@
 .settingsPanel {
-    margin: 10px 0 10px 40px;
+    margin: 20px 0 10px 40px;
     overflow: hidden;
-    height: 150px;
-    transition: height 2s;
+    height: 160px;
+    transition: height 0.5s;
 
     .paper {
         background: none;
-        padding: 4px;
+        padding: 10px;
         display: inline-block;
     }
 
