@@ -19,7 +19,7 @@ import styles from './scss/fusion-recommender.module.scss';
 
 const MAX_FUSION_INGREDIENT_HARD_CAP = 7;
 
-function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings): Models.FusionResults {
+function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
   const myFusionResults: Models.FusionResults = {};
   for (let size = 1; size <= settings.maxIngredient && size <= MAX_FUSION_INGREDIENT_HARD_CAP; size++) {
     myFusionResults[size] = {};
@@ -51,11 +51,11 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
 
           const speciesR: Models.Demon | undefined = demonCompendium.fuseDemons(speciesA, speciesB);
           if (!speciesR) { continue; }
-          if (!postSpeciesFusionCheck(myFusionResults, settings, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
+          if (!filterDemonsAfterSpeciesFusion(myFusionResults, settings, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
 
-          const resultFusedDemons: Models.FusedDemon[] = crossFuseIngredients(speciesR, myFusionResults[ingCountA][idA], myFusionResults[ingCountB][idB]);
+          const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, myFusionResults[ingCountA][idA], myFusionResults[ingCountB][idB]);
           if (!myFusionResults[ingCountR][speciesR.id]) { myFusionResults[ingCountR][speciesR.id] = []; }
-          for (const fusedDemon of resultFusedDemons) {
+          for (const fusedDemon of resultingFusedDemons) {
             myFusionResults[ingCountR][speciesR.id].push(fusedDemon);
           }
         }
@@ -64,24 +64,28 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
     }
 
     if (settings.useTripleFusion) {
-      calculateTripleFusionCombinations(ingredients, demonCompendium, settings, myFusionResults, ingCountR);
+      calculateTripleFusionCombinations(ingredients, demonCompendium, settings, ingredientsSettings, myFusionResults, ingCountR);
     }
   }
 
-  // Re-traverse the entire results and fully purge fusion recipes that produce demons of lower level
+  // At this point, we're completely finished with all fusion combinations
+  // Re-traverse the entire results and purge fusions that don't satisfy various constraints/settings
+  const mustUseDemons: Models.MustUseDemonsMap = prepareIngredientsSettingsForFinalFilter(ingredientsSettings, ingredients);
+  let filterFunction = filterDemonsAfterCalculation.bind(undefined, mustUseDemons);
   for (const ingCount in myFusionResults) {
     if (Number(ingCount) === 1) { continue; }
     for (const id in myFusionResults[ingCount]) {
-      const demonAry: Models.FusedDemon[] = myFusionResults[ingCount][id];
-      const filteredDemonAry = demonAry.filter((demon) => { return !demon.isWeakerThanIngredients() })
-      myFusionResults[ingCount][id] = filteredDemonAry;
+      let demonAry: Models.FusedDemon[] = myFusionResults[ingCount][id];
+      demonAry = demonAry.filter((demon) => { return !demon.isWeakerThanIngredients() });
+      demonAry = demonAry.filter(filterFunction);
+      myFusionResults[ingCount][id] = demonAry;
     }
   }
 
   return myFusionResults;
 }
 
-function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings, fusionResults: Models.FusionResults, ingCountR: number): void {
+function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number): void {
   let ingCounts: number[] = [];
   while (getNextTripleFusionIngCounts(ingCounts, ingCountR)) {
     const [ingCountA, ingCountB, ingCountC] = ingCounts;
@@ -103,8 +107,8 @@ function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demo
           const speciesC: Models.Demon = fusionResults[ingCountC][idC][0].demon;
           const speciesR: Models.Demon | undefined = demonCompendium.tripleFuseDemons(speciesA, speciesB, speciesC);
           if (!speciesR) { continue; }
-          if (!postSpeciesFusionCheck(fusionResults, settings, speciesR, ingCountR, [speciesA, speciesB, speciesC])) { continue; }
-          const resultFusedDemons: Models.FusedDemon[] = crossFuseIngredients(speciesR, fusionResults[ingCountA][idA], fusionResults[ingCountB][idB], fusionResults[ingCountC][idC]);
+          if (!filterDemonsAfterSpeciesFusion(fusionResults, settings, speciesR, ingCountR, [speciesA, speciesB, speciesC])) { continue; }
+          const resultFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResults[ingCountA][idA], fusionResults[ingCountB][idB], fusionResults[ingCountC][idC]);
           if (!fusionResults[ingCountR][speciesR.id]) { fusionResults[ingCountR][speciesR.id] = []; }
           for (const fusedDemon of resultFusedDemons) {
             fusionResults[ingCountR][speciesR.id].push(fusedDemon);
@@ -136,8 +140,8 @@ function getNextTripleFusionIngCounts(fusionIngCounts: number[], ingCountR: numb
   return false;
 }
 
-function postSpeciesFusionCheck(fusionResults: Models.FusionResults, settings: Settings, speciesR: Models.Demon, ingCountR: number, speciesIngs: Models.Demon[]): boolean {
-  // throw out inefficient fusions that the user can already make using fewer ingredients
+function filterDemonsAfterSpeciesFusion(fusionResults: Models.FusionResults, settings: Settings, speciesR: Models.Demon, ingCountR: number, speciesIngs: Models.Demon[]): boolean {
+  // throw out the resulting species if we knew how to make it with fewer ingredients
   let canBeMadeWithLessIngredient: boolean = false;
   for (let sizeCheck = ingCountR - 1; sizeCheck >= 1; sizeCheck--) {
     if (fusionResults[sizeCheck][speciesR.id]) {
@@ -160,7 +164,33 @@ function postSpeciesFusionCheck(fusionResults: Models.FusionResults, settings: S
   return true;
 }
 
-function crossFuseIngredients(resultSpecies: Models.Demon, ...ingredients: Models.FusedDemon[][]): Models.FusedDemon[] {
+function filterDemonsAfterCrissCross(ingSettings: Models.IngredientsSettings, demon: Models.FusedDemon): boolean {
+  const baseIngCount = demon.getBaseIngredientsCounts();
+  for (const id in baseIngCount) {
+    if (baseIngCount[id] > 1 && !ingSettings[id].multipleUse) { return false; }
+  }
+  return true;
+}
+
+function filterDemonsAfterCalculation(mustUseDemons: Models.MustUseDemonsMap, demon: Models.FusedDemon): boolean {
+  const myMustUseDemons = {...mustUseDemons};
+  const demonBaseIngCount = demon.getBaseIngredientsCounts();
+  for (const demonId in demonBaseIngCount) {
+    delete myMustUseDemons[demonId];
+  }
+  if (Object.keys(myMustUseDemons).length > 0) { return false; }
+  return true;
+}
+
+function prepareIngredientsSettingsForFinalFilter(ingSettings: Models.IngredientsSettings, ingredients: Models.Ingredients): Models.MustUseDemonsMap {
+  const mustUseDemons: Models.MustUseDemonsMap = {};
+  for (const id in ingredients) {
+    if (ingSettings[id].mustUse) { mustUseDemons[id] = true };
+  }
+  return mustUseDemons;
+}
+
+function crissCrossFusedDemons(resultSpecies: Models.Demon, ingredientsSettings: Models.IngredientsSettings, ...ingredients: Models.FusedDemon[][]): Models.FusedDemon[] {
   const indeces: number[] = [];
   const ret: Models.FusedDemon[] = [];
   for (let i = 0; i < ingredients.length; i++) { indeces.push(0); }
@@ -182,7 +212,8 @@ function crossFuseIngredients(resultSpecies: Models.Demon, ...ingredients: Model
     }
     if (hasCarry) { break; }
   }
-  return ret;
+  
+  return ret.filter(filterDemonsAfterCrissCross.bind(undefined, ingredientsSettings));;
 }
 
 let ingredients: Models.Ingredients;
@@ -218,7 +249,7 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
   };
 
   function onCalculateButtonClick(): void {
-    setFusionResults(calculateAllFusionCombinations(ingredients, demonCompendium, settings));
+    setFusionResults(calculateAllFusionCombinations(ingredients, demonCompendium, settings, ingredientsSettings));
   }
 
   function onSettingsButtonClick(): void {

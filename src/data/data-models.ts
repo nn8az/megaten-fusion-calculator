@@ -45,6 +45,23 @@ export class FusedDemon {
         }
     }
 
+    public getBaseIngredientsCounts(): { [id: number]: number } {
+        if (this.ingredients) {
+            let ret: { [id: number]: number } = {};
+            for (const parentDemon of this.ingredients) {
+                const parentIngCount = parentDemon.getBaseIngredientsCounts();
+                for (const baseDemonId in parentIngCount) {
+                    ret[baseDemonId] = (ret[baseDemonId] || 0) + parentIngCount[baseDemonId];
+                }
+            }
+            return ret;
+        } else {
+            const ret: { [id: number]: number } = {};
+            ret[this.demon.id] = 1;
+            return ret;
+        }
+    }
+
     public toBaseIngredientsIdCode(): string {
         return Object.keys(this.getBaseIngredients()).join("-");
     }
@@ -83,4 +100,5 @@ export class DemonsPreset {
 
 export type Ingredients = { [demonId: number]: boolean };
 export type IngredientsSettings = { [demonId: number]: { mustUse: boolean, multipleUse: boolean } };
+export type MustUseDemonsMap = {[demonId: number]: boolean};
 export type FusionResults = { [ingredientCount: number]: { [id: string]: FusedDemon[] } };
