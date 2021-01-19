@@ -1,0 +1,11 @@
+.warningBanner {
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    background-color: mix(yellow, black, 25%);
+
+    .warningIcon {
+        color: yellow;
+        margin-right: 5px;
+    }
+}

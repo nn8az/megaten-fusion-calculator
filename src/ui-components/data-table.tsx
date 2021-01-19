@@ -32,6 +32,7 @@ export interface DataTableProvider<T> {
     getRowData(): T[];
     renderRow(rowData: T): JSX.Element | string | undefined;
     getSortValue(rowData: T, sortByCol: number): string | number;
+    renderBanner?(): JSX.Element | undefined;
 }
 type DataTableProps = {
     dataTableProvider: DataTableProvider<any>;
@@ -49,7 +50,12 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     const totalRowCount: number = preIdRowData.length;
 
     // Empty row banner
-    if (totalRowCount === 0) { return <React.Fragment /> }
+    if (totalRowCount === 0) { 
+        let ret = <React.Fragment />;
+        let banner = dataTableProvider.renderBanner? dataTableProvider.renderBanner() : undefined;
+        if (banner) { ret = banner }
+        return ret;
+    }
 
     // ID rows
     const rowData: { id: number, data: any }[] = preIdRowData.map((rd, index) => { return { id: index, data: rd } });

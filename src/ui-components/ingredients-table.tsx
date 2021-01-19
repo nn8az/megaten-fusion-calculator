@@ -6,6 +6,7 @@ import { DemonCompendium } from '../data/demon-compendium';
 import DataTable, * as DataTables from './data-table';
 import TableCell from '@material-ui/core/TableCell';
 import Checkbox from '@material-ui/core/Checkbox';
+import {WarningBanner} from './minor-ui-components';
 
 import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -145,6 +146,10 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
             default: {
                 return rowData.name; }
         };
+    }
+
+    renderBanner(): JSX.Element {
+        return <WarningBanner message="No ingredient demons. Use the above section to add in demons to use in your fusions."/>
     }
 
     demonCompendium: DemonCompendium;
