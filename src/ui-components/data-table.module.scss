@@ -1,0 +1,38 @@
+.paperContainer {
+    display: inline-block;
+    padding: 2px;
+    
+    .tableContainer {
+        
+        :global(.MuiTable-root) {
+            width: auto;
+        }
+
+        :global(.MuiTableCell-root) {
+            padding: 3px 5px;
+        }
+
+        .header {
+            background-color: rgba(black, 0.5);
+        }
+
+        .tableBody {
+            > tr:nth-child(even) {
+                background-color: rgba(black, 0.3);
+            }
+        }
+
+        // MUI Pagination
+        :global(.MuiTablePagination-toolbar) {
+            flex-direction: column-reverse;
+        }
+
+        :global(.MuiTablePagination-spacer) {
+            display: none;
+        }
+
+        :global(.MuiTablePagination-actions) {
+            margin: 0;
+        }
+    }
+}

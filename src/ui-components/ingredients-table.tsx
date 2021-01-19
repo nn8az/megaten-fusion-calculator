@@ -3,15 +3,9 @@ import React from 'react';
 import * as Models from '../data/data-models';
 import { DemonCompendium } from '../data/demon-compendium';
 
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
+import DataTable, * as DataTables from './data-table';
 import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TablePagination from '@material-ui/core/TablePagination';
 import Checkbox from '@material-ui/core/Checkbox';
-import Paper from '@material-ui/core/Paper';
 
 import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -101,76 +95,86 @@ type FusionIngredientsTableProps = {
     ingredientsSettings: Models.IngredientsSettings
     onRemoveIngredient?: (deletedId: number) => void;
 }
-const FusionIngredientsTable = (params: FusionIngredientsTableProps): JSX.Element => {
-    let [page, setPage] = React.useState<number>(0);
-    const pageSize: number = 25;
-    
-    initializeIngredientsSettings(params.ingredients, params.ingredientsSettings);
+class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider<Models.Demon> {
 
-    let rowData: {id: number, data: Models.Demon}[] = React.useMemo(()=>{
-        let id = 1;
-        let rowDataInner: {id: number, data: Models.Demon}[] = [];
+    pageSize: number = 25;
+    getColumnDefinition(): DataTables.ColDef[] {
+        return [{ headerContent: "Demon", sortSpec: { sortType: "string" } },
+        { headerContent: "Level", sortSpec: { sortType: "number" } },
+        { headerContent: "Race", sortSpec: { sortType: "string" } },
+        { headerContent: "Must Use in Fusion", headerProps: { width: 70, align: "center" } },
+        { headerContent: "Can Use Multiple per Recipe", headerProps: { width: 120, align: "center" } },
+        {}];
+    }
+
+    getRowData(): Models.Demon[] {
+        return this.rowData;
+    }
+
+    renderRow(rowData: Models.Demon): JSX.Element {
+        return <React.Fragment>
+            <TableCell>
+                {rowData.name}
+            </TableCell>
+            <TableCell>
+                {rowData.lvl}
+            </TableCell>
+            <TableCell>
+                {rowData.race}
+            </TableCell>
+            <TableCell align="center">
+                <CheckboxSetting demonId={rowData.id} setting={IngredientsSettingsEnum.mustUse} ingredientsSettings={this.ingredientsSettings} />
+            </TableCell>
+            <TableCell align="center">
+                <CheckboxSetting demonId={rowData.id} setting={IngredientsSettingsEnum.multipleUse} ingredientsSettings={this.ingredientsSettings} />
+            </TableCell>
+            <TableCell>
+                <RemoveDemonButton demonId={rowData.id} onRemoveIngredient={this.onRemoveIngredient} />
+            </TableCell>
+        </React.Fragment>;
+    }
+    
+    getSortValue(rowData: Models.Demon, sortByCol: number): string | number {
+        switch(sortByCol) {
+            case 0: { 
+                return rowData.name; }
+            case 1: { 
+                return rowData.lvl; }
+            case 2: { 
+                return rowData.race; }
+            default: {
+                return rowData.name; }
+        };
+    }
+
+    demonCompendium: DemonCompendium;
+    ingredients: Models.Ingredients;
+    ingredientsSettings: Models.IngredientsSettings;
+    onRemoveIngredient?: (deletedId: number) => void;
+
+    rowData: Models.Demon[];
+
+    constructor(params: FusionIngredientsTableProps, rowData: Models.Demon[]) {
+        this.demonCompendium = params.demonCompendium;
+        this.ingredients = params.ingredients;
+        this.ingredientsSettings = params.ingredientsSettings;
+        this.onRemoveIngredient = params.onRemoveIngredient;
+
+        this.rowData = rowData;
+    }
+}
+const FusionIngredientsTable = (params: FusionIngredientsTableProps): JSX.Element => {
+    initializeIngredientsSettings(params.ingredients, params.ingredientsSettings);
+    const rowData: Models.Demon[] = React.useMemo(() => {
+        let rowData: Models.Demon[] = [];
         for (const demonId in params.ingredients) {
             const demon = params.demonCompendium.getDemonById(Number(demonId));
             if (!demon) { continue; }
-            rowDataInner.push({id: id, data: demon});
-            id++;
+            rowData.push(demon);
         }
-        return rowDataInner;
+        return rowData;
     }, [params.ingredients, params.demonCompendium]);
-    const totalRow: number = rowData.length;
-    rowData = rowData.filter((demon, index) => (index >= page * pageSize) && (index < (page + 1) * pageSize));
-
-    function changePage(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null, page: number) {
-        setPage(page);
-    }
-
-    if (Object.keys(params.ingredients).length === 0) { return <React.Fragment /> }
-    return <Paper className={styles.ingredientsTableContainer} elevation={1}>
-        <TableContainer className={styles.ingredientsTable}>
-            <Table>
-                <TableHead className={styles.ingredientsTableHeader}>
-                    <TableRow>
-                        <TableCell className={styles.demonColumnHeader}>Demon</TableCell>
-                        <TableCell>Level</TableCell>
-                        <TableCell>Race</TableCell>
-                        <TableCell width="100" align="center">Must Use in Fusion</TableCell>
-                        <TableCell width="150" align="center">Can Use Multiple per Recipe</TableCell>
-                        <TableCell></TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody className={styles.ingredientsTableBody}>
-                    {rowData.map((row) => <TableRow key={row.data.id}>
-                        <TableCell>
-                            {row.data.name}
-                        </TableCell>
-                        <TableCell>
-                            {row.data.lvl}
-                        </TableCell>
-                        <TableCell>
-                            {row.data.race}
-                        </TableCell>
-                        <TableCell align="center">
-                            <CheckboxSetting demonId={row.data.id} setting={IngredientsSettingsEnum.mustUse} ingredientsSettings={params.ingredientsSettings} />
-                        </TableCell>
-                        <TableCell align="center">
-                            <CheckboxSetting demonId={row.data.id} setting={IngredientsSettingsEnum.multipleUse} ingredientsSettings={params.ingredientsSettings} />
-                        </TableCell>
-                        <TableCell>
-                            <RemoveDemonButton demonId={row.data.id} onRemoveIngredient={params.onRemoveIngredient} />
-                        </TableCell>
-                    </TableRow>)}
-                </TableBody>
-            </Table>
-            <TablePagination
-                            rowsPerPageOptions={[pageSize]}
-                            component="div"
-                            count={totalRow}
-                            rowsPerPage={pageSize}
-                            page={page}
-                            onChangePage={changePage}
-                        />
-        </TableContainer>
-    </Paper>
+    const dataProvider = new FusionIngredientsDataTableProvider(params, rowData);
+    return <DataTable dataTableProvider={dataProvider}/>
 }
 export default React.memo(FusionIngredientsTable);
