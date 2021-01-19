@@ -14,11 +14,22 @@ export class Settings {
 
     useTripleFusionSettingIsVisible: boolean = false;
 }
-
-export default function SettingsPanel(params: { visible: boolean, settings: Settings }) : JSX.Element {
-    const {visible, settings } = params;
+export type SettingsPanelEventHandlers = { toggleVisibility?: Function }
+type SettingsPanelProps = {
+    eventHandlers: SettingsPanelEventHandlers,
+    settings: Settings
+}
+export default function SettingsPanel(params: SettingsPanelProps) : JSX.Element {
+    const {eventHandlers, settings } = params;
+    
+    const [isVisible, setIsVisible] = useState<boolean>(false);
     const [charLvlFieldValue, setCharLvlFieldValue] = useState<number | string>(settings.charLvl);
     const [maxIngFieldValue, setMaxIngFieldValue] = useState<number | string>(settings.maxIngredient);
+
+    function onVisibilityToggle(): void {
+        setIsVisible(!isVisible);
+    }
+    eventHandlers.toggleVisibility = onVisibilityToggle;
 
     function onSetCharLvl(newValue: number): void {
         settings.charLvl = newValue;
@@ -33,7 +44,7 @@ export default function SettingsPanel(params: { visible: boolean, settings: Sett
     }
 
     const settingsPanelStyle: React.CSSProperties = {};
-    if (!visible) { settingsPanelStyle.height = "0px"; }
+    if (!isVisible) { settingsPanelStyle.height = "0px"; }
     return <div style={settingsPanelStyle} className={styles.settingsPanel}>
         <Paper variant="outlined" className={styles.paper}>
             <h2>Settings</h2>

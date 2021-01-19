@@ -2,7 +2,7 @@ import React from 'react';
 
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
+import TableCell, { TableCellProps } from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
@@ -13,25 +13,20 @@ import Paper from '@material-ui/core/Paper';
 import styles from './scss/data-table.module.scss';
 
 type StatePair<T> = [T, React.Dispatch<React.SetStateAction<T>>];
-export type CellProps = {
-    className?: string;
-    width?: number;
-    align?: 'inherit' | 'left' | 'center' | 'right' | 'justify';
-}
 export type SortSpec = {
     sortType: 'number' | 'string'
 }
 export type ColDef = {
     headerContent?: JSX.Element | string;
     sortSpec?: SortSpec;
-    headerProps?: CellProps;
+    headerProps?: TableCellProps;
 }
 export interface DataTableProvider<T> {
     pageSize: number;
     getColumnDefinition(): ColDef[];
-    getRowData(): T[];
+    getAllRowsData(): T[];
     renderRow(rowData: T): JSX.Element | string | undefined;
-    getSortValue(rowData: T, sortByCol: number): string | number;
+    getSortValue?(rowData: T, sortByCol: number): string | number;
     renderBanner?(): JSX.Element | undefined;
 }
 type DataTableProps = {
@@ -46,7 +41,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     const pageSize: number = dataTableProvider.pageSize;
 
     const colDefs: ColDef[] = dataTableProvider.getColumnDefinition();
-    const preIdRowData: any[] = dataTableProvider.getRowData();
+    const preIdRowData: any[] = dataTableProvider.getAllRowsData();
     const totalRowCount: number = preIdRowData.length;
 
     // Empty row banner
@@ -61,12 +56,13 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     const rowData: { id: number, data: any }[] = preIdRowData.map((rd, index) => { return { id: index, data: rd } });
 
     // Sort rows
-    if (sortByCol && sortDirection !== undefined) {
+    if ((sortByCol !== undefined) && (sortDirection !== undefined) && (dataTableProvider.getSortValue !== undefined)) {
+        const getSortValue = dataTableProvider.getSortValue;
         const sortMult: number = (sortDirection === "asc") ? 1 : -1;
         const comparitor: (...x: any) => number = (sortType === "number") ? numberComparitor : stringComparitor;
         rowData.sort((a, b) => { 
-            const valA = dataTableProvider.getSortValue(a.data, sortByCol);
-            const valB = dataTableProvider.getSortValue(b.data, sortByCol);
+            const valA = getSortValue(a.data, sortByCol);
+            const valB = getSortValue(b.data, sortByCol);
             return sortMult * comparitor(valA, valB) });
     }
 
@@ -82,7 +78,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     for (const colDef of colDefs) {
         const headerContent = colDef.sortSpec ? buildSortableHeaderCellContent(colDef.headerContent, colNum, colDef.sortSpec.sortType, [sortByCol, setSortByCol], [sortDirection, setSortDirection], [sortType, setSortType]) : colDef.headerContent;
 
-        headerCells.push(<TableCell {...colDef.headerProps}>{headerContent}</TableCell>);
+        headerCells.push(<TableCell key={"H-" + colNum} {...colDef.headerProps}>{headerContent}</TableCell>);
         colNum++;
     }
 

@@ -99,17 +99,20 @@ type FusionIngredientsTableProps = {
 class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider<Models.Demon> {
 
     pageSize: number = 25;
+
     getColumnDefinition(): DataTables.ColDef[] {
-        return [{ headerContent: "Demon", sortSpec: { sortType: "string" } },
-        { headerContent: "Level", sortSpec: { sortType: "number" } },
-        { headerContent: "Race", sortSpec: { sortType: "string" } },
-        { headerContent: "Must Use in Fusion", headerProps: { width: 70, align: "center" } },
-        { headerContent: "Can Use Multiple per Recipe", headerProps: { width: 120, align: "center" } },
-        {}];
+        return [
+            { headerContent: "Demon", sortSpec: { sortType: "string" } },
+            { headerContent: "Level", sortSpec: { sortType: "number" } },
+            { headerContent: "Race", sortSpec: { sortType: "string" } },
+            { headerContent: "Must Use in Fusion", headerProps: { width: 70, align: "center" } },
+            { headerContent: "Can Use Multiple per Recipe", headerProps: { width: 120, align: "center" } },
+            {}
+        ];
     }
 
-    getRowData(): Models.Demon[] {
-        return this.rowData;
+    getAllRowsData(): Models.Demon[] {
+        return this.allRowsData;
     }
 
     renderRow(rowData: Models.Demon): JSX.Element {
@@ -149,7 +152,7 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
     }
 
     renderBanner(): JSX.Element {
-        return <WarningBanner message="No ingredient demons. Use the above section to add in demons to use in your fusions."/>
+        return <WarningBanner message="No ingredient demons. Use the section above to add demons to use in fusions."/>
     }
 
     demonCompendium: DemonCompendium;
@@ -157,15 +160,15 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
     ingredientsSettings: Models.IngredientsSettings;
     onRemoveIngredient?: (deletedId: number) => void;
 
-    rowData: Models.Demon[];
+    allRowsData: Models.Demon[];
 
-    constructor(params: FusionIngredientsTableProps, rowData: Models.Demon[]) {
+    constructor(params: FusionIngredientsTableProps, allRowsData: Models.Demon[]) {
         this.demonCompendium = params.demonCompendium;
         this.ingredients = params.ingredients;
         this.ingredientsSettings = params.ingredientsSettings;
         this.onRemoveIngredient = params.onRemoveIngredient;
 
-        this.rowData = rowData;
+        this.allRowsData = allRowsData;
     }
 }
 const FusionIngredientsTable = (params: FusionIngredientsTableProps): JSX.Element => {
