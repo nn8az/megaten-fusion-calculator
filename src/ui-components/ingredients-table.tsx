@@ -154,7 +154,7 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
 
     renderBanner(): JSX.Element {
         const icon = <WarningIcon className={styles.warningIcon}/>;
-        return <WarningBanner message="No ingredient demons. Use the section above to add demons to use in fusions." icon={icon}/>
+        return <WarningBanner message="No ingredient demons. Use the section above to add demons to use for fusions." icon={icon}/>
     }
 
     demonCompendium: DemonCompendium;

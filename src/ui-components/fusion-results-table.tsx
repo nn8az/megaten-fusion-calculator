@@ -85,7 +85,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
     }
 
     renderBanner(): JSX.Element {
-        return <WarningBanner message="No results found!" />
+        return <WarningBanner message="No results found" />
     }
 
     private renderDemonName(demon: Models.FusedDemon): JSX.Element {
