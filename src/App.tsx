@@ -52,10 +52,12 @@ export default function App(): JSX.Element {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="myApp">
-        <header className="App-header">
-          <h1>Megami Tensei Fusion Recommender</h1>
+        <header>
+          <h1>MegaTen Fusion by Results Calculator</h1>
         </header>
-        {fusionRecommender}
+        <div className="appBody">
+          {fusionRecommender}
+        </div>
       </div>
     </ThemeProvider>);
 }
