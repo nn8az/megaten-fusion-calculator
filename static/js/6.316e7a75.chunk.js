@@ -1,2 +1,0 @@
-(this["webpackJsonpmegaten-fusion-calculator"]=this["webpackJsonpmegaten-fusion-calculator"]||[]).push([[6],{181:function(e){e.exports=JSON.parse('{"sameRaceFusionMechanic":"persona","tripleFusionMechanic":"persona","disableSameDemonFusion":true}')}}]);
-//# sourceMappingURL=6.316e7a75.chunk.js.map
