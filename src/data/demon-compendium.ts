@@ -270,7 +270,9 @@ export class DemonCompendium {
                     const raceId: number = this.raceIdMap[race];
                     for (const elementId in this.elementsMap) {
                         const elementIndex = elementIdIndexMap[elementId];
-                        this.elementFusionChart[race][elementId] = fusionChartJson.elementFusionTable[raceId][elementIndex];
+                        if (fusionChartJson.elementFusionTable[raceId]) {
+                            this.elementFusionChart[race][elementId] = fusionChartJson.elementFusionTable[raceId][elementIndex];
+                        }
                     }
                 }
             }

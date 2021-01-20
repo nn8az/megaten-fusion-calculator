@@ -10,7 +10,7 @@ import styles from './scss/results-table.module.scss';
 
 class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Models.FusedDemon> {
 
-    pageSize: number = 25;
+    pageSize: number = 50;
 
     getColumnDefinition(): DataTables.ColDef[] {
         const colDefs: DataTables.ColDef[] = [
@@ -41,33 +41,35 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
         return resultsAsRowsArray;
     }
 
-    renderRow(fusedDemon: Models.FusedDemon, cellKeys: string[]): JSX.Element {
+    renderRow(fusedDemon: Models.FusedDemon): JSX.Element {
         const renderedRow: JSX.Element[] = [];
-        renderedRow.push(<React.Fragment>
-            <TableCell className={styles.nameColumn} key={cellKeys[0]}>
+        let keyId: number = 0;
+        renderedRow.push(<React.Fragment key={keyId}>
+            <TableCell className={styles.nameColumn}>
                 {fusedDemon.demon.name}
             </TableCell>
-            <TableCell className={styles.lvlColumn} key={cellKeys[1]}>
+            <TableCell className={styles.lvlColumn}>
                 {fusedDemon.demon.lvl}
             </TableCell>
-            <TableCell className={styles.raceColumn} key={cellKeys[2]}>
+            <TableCell className={styles.raceColumn}>
                 {fusedDemon.demon.race}
             </TableCell>
         </React.Fragment>);
-        let cellKeyIndex: number = 3;
+        keyId++;
         for (const stat of fusedDemon.demon.stats) {
-            renderedRow.push(<React.Fragment>
-                <TableCell className={styles.statColumn} key={cellKeys[cellKeyIndex]}>
+            renderedRow.push(<React.Fragment key={keyId}>
+                <TableCell className={styles.statColumn}>
                     {stat}
                 </TableCell>
             </React.Fragment>);
-            cellKeyIndex++;
+            keyId++;
         }
-        renderedRow.push(<React.Fragment>
-            <TableCell key={cellKeys[cellKeyIndex]}>
+        renderedRow.push(<React.Fragment key={keyId}>
+            <TableCell>
                 {this.renderRecipe(fusedDemon)}
             </TableCell>
         </React.Fragment>);
+        keyId++;
         return <React.Fragment>{renderedRow}</React.Fragment>;
     }
     

@@ -12,7 +12,6 @@
     h1 {
         color: rgb(30, 30, 30);
         padding-left: 5px;
-        margin-bottom: 10px;
         font-size: 40px;
         background-color: $headerBackgroundColor;
     }
@@ -26,6 +25,15 @@
     }
     
     /* Override Material UI */
+    // Tabs
+    .MuiTabs-root {
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .MuiTabs-indicator {
+        background-color: $headerBackgroundColor;
+    }
+
     .MuiDataGrid-root .MuiDataGrid-colCell, .MuiDataGrid-root .MuiDataGrid-cell {
         padding: 0 8px 0 4px;
     }

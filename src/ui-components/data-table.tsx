@@ -25,7 +25,7 @@ export interface DataTableProvider<T> {
     pageSize: number;
     getColumnDefinition(): ColDef[];
     getAllRowsData(): T[];
-    renderRow(rowData: T, cellKeys: string[]): JSX.Element | string | undefined;
+    renderRow(rowData: T): JSX.Element | string | undefined;
     getSortValue?(rowData: T, sortByCol: number): string | number;
     renderBanner?(): JSX.Element | undefined;
 }
@@ -95,13 +95,9 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     // Render rows
     const renderedRows: JSX.Element[] = [];
     for (const row of paginizedRowData) {
-        const cellKeys: string[] = [];
-        for (let i = 0; i < colNum; i++) {
-            cellKeys.push(row.id + "-" + i);
-        }
         renderedRows.push(
             <TableRow key={row.id}>
-                {dataTableProvider.renderRow(row.data, cellKeys)}
+                {dataTableProvider.renderRow(row.data)}
             </TableRow>
         )
     }
@@ -115,7 +111,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
         <TableContainer className={styles.tableContainer}>
             <Table>
                 <TableHead className={styles.header}>
-                    <TableRow >
+                    <TableRow>
                         {headerCells}
                     </TableRow>
                 </TableHead>

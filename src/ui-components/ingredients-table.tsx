@@ -116,24 +116,24 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
         return this.allRowsData;
     }
 
-    renderRow(rowData: Models.Demon, cellKeys: string[]): JSX.Element {
+    renderRow(rowData: Models.Demon): JSX.Element {
         return <React.Fragment>
-            <TableCell key={cellKeys[0]}>
+            <TableCell>
                 {rowData.name}
             </TableCell>
-            <TableCell key={cellKeys[1]}>
+            <TableCell>
                 {rowData.lvl}
             </TableCell>
-            <TableCell key={cellKeys[2]}>
+            <TableCell>
                 {rowData.race}
             </TableCell>
-            <TableCell align="center" key={cellKeys[3]}>
+            <TableCell align="center">
                 <CheckboxSetting demonId={rowData.id} setting={IngredientsSettingsEnum.mustUse} ingredientsSettings={this.ingredientsSettings} />
             </TableCell>
-            <TableCell align="center" key={cellKeys[4]}>
+            <TableCell align="center">
                 <CheckboxSetting demonId={rowData.id} setting={IngredientsSettingsEnum.multipleUse} ingredientsSettings={this.ingredientsSettings} />
             </TableCell>
-            <TableCell key={cellKeys[5]}>
+            <TableCell>
                 <RemoveDemonButton demonId={rowData.id} onRemoveIngredient={this.onRemoveIngredient} />
             </TableCell>
         </React.Fragment>;

@@ -9,7 +9,7 @@ import { DemonCompendium } from '../data/demon-compendium';
 import Button from '@material-ui/core/Button';
 import IngredientsTable from './ingredients-table';
 import ResultsTable from './results-table';
-import SettingsPanel, { Settings, SettingsPanelEventHandlers } from './settings-panel';
+import SettingsPanel, { UserSettings, SettingsPanelEventHandlers } from './settings-panel';
 import DemonAdder from './demon-adder';
 
 import ReplayIcon from '@material-ui/icons/Replay';
@@ -19,7 +19,7 @@ import styles from './scss/fusion-calculator.module.scss';
 
 const MAX_FUSION_INGREDIENT_HARD_CAP = 5;
 
-function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
+function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: UserSettings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
   const myFusionResults: Models.FusionResults = {};
   for (let size = 1; size <= settings.maxIngredient && size <= MAX_FUSION_INGREDIENT_HARD_CAP; size++) {
     myFusionResults[size] = {};
@@ -85,7 +85,7 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
   return myFusionResults;
 }
 
-function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number): void {
+function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: UserSettings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number): void {
   let ingCounts: number[] = [];
   while (getNextTripleFusionIngCounts(ingCounts, ingCountR)) {
     const [ingCountA, ingCountB, ingCountC] = ingCounts;
@@ -140,7 +140,7 @@ function getNextTripleFusionIngCounts(fusionIngCounts: number[], ingCountR: numb
   return false;
 }
 
-function filterDemonsAfterSpeciesFusion(fusionResults: Models.FusionResults, settings: Settings, speciesR: Models.Demon, ingCountR: number, speciesIngs: Models.Demon[]): boolean {
+function filterDemonsAfterSpeciesFusion(fusionResults: Models.FusionResults, settings: UserSettings, speciesR: Models.Demon, ingCountR: number, speciesIngs: Models.Demon[]): boolean {
   // throw out the resulting species if we knew how to make it with fewer ingredients
   let canBeMadeWithLessIngredient: boolean = false;
   for (let sizeCheck = ingCountR - 1; sizeCheck >= 1; sizeCheck--) {
@@ -235,7 +235,7 @@ function removeDemonFromIngredients(demonId: number): void {
   setIngredients(newIngredients);
 }
 let ingredientsSettings: Models.IngredientsSettings = {};
-let settings: Settings;
+let settings: UserSettings;
 
 export default function FusionByResultsCalculator(params: { demonCompendium: DemonCompendium }): JSX.Element {
   const { demonCompendium } = params;
@@ -244,7 +244,7 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
   const settingsPanelEventHandlers: SettingsPanelEventHandlers = {};
   if (!settings) {
-    settings = new Settings();
+    settings = new UserSettings();
     settings.useTripleFusion = demonCompendium.usePersonaTripleFusionMechanic;
     settings.useTripleFusionSettingIsVisible = demonCompendium.usePersonaTripleFusionMechanic;
   }

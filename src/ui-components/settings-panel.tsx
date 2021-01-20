@@ -7,7 +7,7 @@ import Paper from '@material-ui/core/Paper';
 
 import styles from './scss/settings-panel.module.scss';
 
-export class Settings {
+export class UserSettings {
     charLvl: number = 99;
     maxIngredient: number = 3;
     useTripleFusion: boolean = false;
@@ -17,7 +17,7 @@ export class Settings {
 export type SettingsPanelEventHandlers = { toggleVisibility?: Function }
 type SettingsPanelProps = {
     eventHandlers: SettingsPanelEventHandlers,
-    settings: Settings
+    settings: UserSettings
 }
 export default function SettingsPanel(params: SettingsPanelProps) : JSX.Element {
     const {eventHandlers, settings } = params;
