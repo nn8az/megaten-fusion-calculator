@@ -9,3 +9,13 @@
         color: palevioletred;
     }
 }
+
+.noIngredientsMsg {
+    display: flex;
+    align-items: center;
+}
+
+.warningIcon {
+    color: yellow;
+    opacity: 50%;
+}

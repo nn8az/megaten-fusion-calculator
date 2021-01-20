@@ -6,9 +6,9 @@ import { DemonCompendium } from '../data/demon-compendium';
 import DataTable, * as DataTables from './data-table';
 import TableCell from '@material-ui/core/TableCell';
 import Checkbox from '@material-ui/core/Checkbox';
-import {WarningBanner} from './minor-ui-components';
 
 import IconButton from '@material-ui/core/IconButton';
+import WarningIcon from '@material-ui/icons/Warning';
 import CancelIcon from '@material-ui/icons/Cancel';
 
 import styles from './scss/ingredients-table.module.scss';
@@ -105,7 +105,7 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
             { headerContent: "Demon", sortSpec: { sortType: "string" } },
             { headerContent: "Level", sortSpec: { sortType: "number" } },
             { headerContent: "Race", sortSpec: { sortType: "string" } },
-            { headerContent: "Must Use in Fusion", headerProps: { width: 70, align: "center" } },
+            { headerContent: "Only Show Recipes That Use This Demon", headerProps: { width: 150, align: "center" } },
             { headerContent: "Can Use Multiple per Recipe", headerProps: { width: 120, align: "center" } },
             {}
         ];
@@ -152,7 +152,10 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
     }
 
     renderBanner(): JSX.Element {
-        return <WarningBanner message="No ingredient demons. Use the section above to add demons to use in fusions."/>
+        return <div className={styles.noIngredientsMsg}>
+            <WarningIcon className={styles.warningIcon}/>
+            <span>No ingredient demons. Use the section above to add demons to use in fusions.</span>
+        </div>
     }
 
     demonCompendium: DemonCompendium;
@@ -171,7 +174,8 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
         this.allRowsData = allRowsData;
     }
 }
-const FusionIngredientsTable = (params: FusionIngredientsTableProps): JSX.Element => {
+
+const IngredientsTable = (params: FusionIngredientsTableProps): JSX.Element => {
     initializeIngredientsSettings(params.ingredients, params.ingredientsSettings);
     const rowData: Models.Demon[] = React.useMemo(() => {
         let rowData: Models.Demon[] = [];
@@ -185,4 +189,4 @@ const FusionIngredientsTable = (params: FusionIngredientsTableProps): JSX.Elemen
     const dataProvider = new FusionIngredientsDataTableProvider(params, rowData);
     return <DataTable dataTableProvider={dataProvider}/>
 }
-export default React.memo(FusionIngredientsTable);
+export default React.memo(IngredientsTable);

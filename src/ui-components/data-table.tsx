@@ -8,7 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Paper from '@material-ui/core/Paper';
+import Paper, { PaperProps } from '@material-ui/core/Paper';
 
 import styles from './scss/data-table.module.scss';
 
@@ -29,7 +29,7 @@ export interface DataTableProvider<T> {
     getSortValue?(rowData: T, sortByCol: number): string | number;
     renderBanner?(): JSX.Element | undefined;
 }
-type DataTableProps = {
+interface DataTableProps extends PaperProps {
     dataTableProvider: DataTableProvider<any>;
 }
 const DataTable = (params: DataTableProps): JSX.Element => {
@@ -45,11 +45,21 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     const totalRowCount: number = preIdRowData.length;
 
     // Empty row banner
-    if (totalRowCount === 0) { 
+    if (totalRowCount === 0) {
+        if (sortByCol !== undefined) { setSortByCol(undefined); }
+        if (page !== 0) { setPage(0); }
+        if (sortDirection !== undefined) { setSortDirection(undefined); }
         let ret = <React.Fragment />;
         let banner = dataTableProvider.renderBanner? dataTableProvider.renderBanner() : undefined;
         if (banner) { ret = banner }
         return ret;
+    }
+
+    // Shift page down if table loses rows
+    if (page * pageSize >= totalRowCount)
+    {
+        setPage(Math.ceil(totalRowCount / pageSize - 1));
+        return <React.Fragment />;
     }
 
     // ID rows
@@ -92,7 +102,12 @@ const DataTable = (params: DataTableProps): JSX.Element => {
         )
     }
 
-    return <Paper className={styles.paperContainer} elevation={3}>
+    let paperContainerClassName: string = styles.paperContainer;
+    if (params.className) {
+        paperContainerClassName += " " + params.className;
+    }
+
+    return <Paper className={paperContainerClassName} elevation={3}>
         <TableContainer className={styles.tableContainer}>
             <Table>
                 <TableHead className={styles.header}>

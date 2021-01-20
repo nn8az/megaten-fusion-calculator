@@ -3,11 +3,6 @@
     padding: 2px;
     
     .tableContainer {
-        
-        :global(.MuiTable-root) {
-            width: auto;
-        }
-
         :global(.MuiTableCell-root) {
             padding: 3px 5px;
         }

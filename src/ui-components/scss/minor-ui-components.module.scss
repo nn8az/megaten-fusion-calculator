@@ -1,9 +1,5 @@
 .warningBanner {
     display: flex;
     align-items: center;
-
-    .warningIcon {
-        color: rgba(yellow, 0.5);
-        margin-right: 2px;
-    }
+    padding: 5px;
 }

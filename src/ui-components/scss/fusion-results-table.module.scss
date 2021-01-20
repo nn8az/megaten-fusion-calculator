@@ -1,0 +1,64 @@
+.dataTable {
+    width: 100%;
+    min-width: 900px;
+
+    table {
+        display: block;
+        empty-cells: show;
+        border-spacing: 0;
+
+        thead {
+            display: block;
+            position: relative;
+            overflow-y: scroll;
+        }
+
+        tbody {
+            display: block;
+            position: relative;
+            width: 100%;
+            overflow-y: scroll;
+            height: 700px;
+        }
+
+        tr {
+            width: 100%;
+            display: flex;
+        }
+
+        td, th {
+            display: block;
+            flex-basis: 200%;
+            word-wrap: break-word;
+        }
+
+        .nameColumn {
+            flex-basis: 20%;
+            min-width: 100px;
+            word-wrap: break-word;
+        }
+
+        .lvlColumn {
+            flex-basis: 70px;
+            min-width: 70px;
+        }
+
+        .raceColumn {
+            flex-basis: 15%;
+            min-width: 50px;
+        }
+
+        .statColumn {
+            flex-basis: 50px;
+            min-width: 50px;
+        }
+    }
+
+    .baseIngredientName {
+        color: aqua;
+    }
+}
+
+.noResultsBanner{
+    padding: 10px;
+}
