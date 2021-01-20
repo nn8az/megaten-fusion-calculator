@@ -1,9 +1,9 @@
 import React from 'react';
 
-import * as Models from '../data/data-models';
+import * as Models from '../../data/data-models';
 import { DataGrid, ColDef, CellParams, ValueGetterParams } from '@material-ui/data-grid';
 import { useRef, useEffect } from 'react';
-import styles from './scss/ui-components.module.scss';
+import styles from '../scss/ui-components.module.scss';
 
 function renderDemonName(demon: Models.FusedDemon): JSX.Element {
     if (demon.isFused()) {

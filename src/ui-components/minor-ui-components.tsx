@@ -10,8 +10,12 @@ type WarningBannerProps = {
     className?: string;
 }
 const WarningBannerCore = (params: WarningBannerProps): JSX.Element => {
+    let icon;
+    if (params.icon) {
+        icon = <div className={styles.icon}>{params.icon}</div>
+    }
     return <Paper className={params.className? params.className : styles.warningBanner}>
-        {params.icon}<span>{params.message}</span>
+        {icon}<span>{params.message}</span>
     </Paper>
 }
 export const WarningBanner = React.memo(WarningBannerCore);

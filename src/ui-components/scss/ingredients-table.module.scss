@@ -1,18 +1,23 @@
-.checkBox:global(.MuiButtonBase-root) {
-    padding: 0;
-}
-
-.removeDemonButton:global(.MuiIconButton-root) {
-    padding: 0;
-
-    .removeDemonButtonIcon {
-        color: palevioletred;
+.dataTable {
+    .checkBox:global(.MuiButtonBase-root) {
+        padding: 0;
     }
-}
 
-.noIngredientsMsg {
-    display: flex;
-    align-items: center;
+    .nameColumnHeader {
+        min-width: 150px;
+    }
+
+    .raceColumnHeader {
+        min-width: 100px;
+    }
+    
+    .removeDemonButton:global(.MuiIconButton-root) {
+        padding: 0;
+    
+        .removeDemonButtonIcon {
+            color: palevioletred;
+        }
+    }
 }
 
 .warningIcon {

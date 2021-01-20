@@ -1,5 +1,11 @@
 .warningBanner {
     display: flex;
     align-items: center;
-    padding: 5px;
+    padding: 10px;
+
+    .icon {
+        display: flex;
+        align-content: center;
+        margin-right: 5px;
+    }
 }

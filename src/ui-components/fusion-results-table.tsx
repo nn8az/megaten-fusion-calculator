@@ -41,28 +41,30 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
         return resultsAsRowsArray;
     }
 
-    renderRow(fusedDemon: Models.FusedDemon): JSX.Element {
+    renderRow(fusedDemon: Models.FusedDemon, cellKeys: string[]): JSX.Element {
         const renderedRow: JSX.Element[] = [];
         renderedRow.push(<React.Fragment>
-            <TableCell className={styles.nameColumn}>
+            <TableCell className={styles.nameColumn} key={cellKeys[0]}>
                 {fusedDemon.demon.name}
             </TableCell>
-            <TableCell className={styles.lvlColumn}>
+            <TableCell className={styles.lvlColumn} key={cellKeys[1]}>
                 {fusedDemon.demon.lvl}
             </TableCell>
-            <TableCell className={styles.raceColumn}>
+            <TableCell className={styles.raceColumn} key={cellKeys[2]}>
                 {fusedDemon.demon.race}
             </TableCell>
         </React.Fragment>);
+        let cellKeyIndex: number = 3;
         for (const stat of fusedDemon.demon.stats) {
             renderedRow.push(<React.Fragment>
-                <TableCell className={styles.statColumn}>
+                <TableCell className={styles.statColumn} key={cellKeys[cellKeyIndex]}>
                     {stat}
                 </TableCell>
             </React.Fragment>);
+            cellKeyIndex++;
         }
         renderedRow.push(<React.Fragment>
-            <TableCell>
+            <TableCell key={cellKeys[cellKeyIndex]}>
                 {this.renderRecipe(fusedDemon)}
             </TableCell>
         </React.Fragment>);
@@ -83,7 +85,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
     }
 
     renderBanner(): JSX.Element {
-        return <WarningBanner message="No results found!" className={styles.noResultsBanner} />
+        return <WarningBanner message="No results found!" />
     }
 
     private renderDemonName(demon: Models.FusedDemon): JSX.Element {

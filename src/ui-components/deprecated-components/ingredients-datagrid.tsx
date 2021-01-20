@@ -1,14 +1,14 @@
 import React from 'react';
 
-import * as Models from '../data/data-models';
-import { DemonCompendium } from '../data/demon-compendium';
+import * as Models from '../../data/data-models';
+import { DemonCompendium } from '../../data/demon-compendium';
 
 import { DataGrid, ColDef, CellParams } from '@material-ui/data-grid';
 import { useRef, useEffect } from 'react';
 
 import IconButton from '@material-ui/core/IconButton';
 import CancelIcon from '@material-ui/icons/Cancel';
-import styles from './scss/ui-components.module.scss';
+import styles from '../scss/ui-components.module.scss';
 
 const FusionIngredientsDataGrid = (params: {
   demonCompendium: DemonCompendium

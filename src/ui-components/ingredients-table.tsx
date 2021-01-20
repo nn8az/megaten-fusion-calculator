@@ -6,6 +6,7 @@ import { DemonCompendium } from '../data/demon-compendium';
 import DataTable, * as DataTables from './data-table';
 import TableCell from '@material-ui/core/TableCell';
 import Checkbox from '@material-ui/core/Checkbox';
+import { WarningBanner } from './minor-ui-components';
 
 import IconButton from '@material-ui/core/IconButton';
 import WarningIcon from '@material-ui/icons/Warning';
@@ -102,8 +103,8 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
 
     getColumnDefinition(): DataTables.ColDef[] {
         return [
-            { headerContent: "Demon", sortSpec: { sortType: "string" } },
-            { headerContent: "Level", sortSpec: { sortType: "number" } },
+            { headerContent: "Demon", sortSpec: { sortType: "string" }, headerProps: {className: styles.nameColumnHeader} },
+            { headerContent: "Level", sortSpec: { sortType: "number" }, headerProps: {className: styles.raceColumnHeader} },
             { headerContent: "Race", sortSpec: { sortType: "string" } },
             { headerContent: "Only Show Recipes That Use This Demon", headerProps: { width: 150, align: "center" } },
             { headerContent: "Can Use Multiple per Recipe", headerProps: { width: 120, align: "center" } },
@@ -115,24 +116,24 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
         return this.allRowsData;
     }
 
-    renderRow(rowData: Models.Demon): JSX.Element {
+    renderRow(rowData: Models.Demon, cellKeys: string[]): JSX.Element {
         return <React.Fragment>
-            <TableCell>
+            <TableCell key={cellKeys[0]}>
                 {rowData.name}
             </TableCell>
-            <TableCell>
+            <TableCell key={cellKeys[1]}>
                 {rowData.lvl}
             </TableCell>
-            <TableCell>
+            <TableCell key={cellKeys[2]}>
                 {rowData.race}
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="center" key={cellKeys[3]}>
                 <CheckboxSetting demonId={rowData.id} setting={IngredientsSettingsEnum.mustUse} ingredientsSettings={this.ingredientsSettings} />
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="center" key={cellKeys[4]}>
                 <CheckboxSetting demonId={rowData.id} setting={IngredientsSettingsEnum.multipleUse} ingredientsSettings={this.ingredientsSettings} />
             </TableCell>
-            <TableCell>
+            <TableCell key={cellKeys[5]}>
                 <RemoveDemonButton demonId={rowData.id} onRemoveIngredient={this.onRemoveIngredient} />
             </TableCell>
         </React.Fragment>;
@@ -152,10 +153,8 @@ class FusionIngredientsDataTableProvider implements DataTables.DataTableProvider
     }
 
     renderBanner(): JSX.Element {
-        return <div className={styles.noIngredientsMsg}>
-            <WarningIcon className={styles.warningIcon}/>
-            <span>No ingredient demons. Use the section above to add demons to use in fusions.</span>
-        </div>
+        const icon = <WarningIcon className={styles.warningIcon}/>;
+        return <WarningBanner message="No ingredient demons. Use the section above to add demons to use in fusions." icon={icon}/>
     }
 
     demonCompendium: DemonCompendium;
@@ -187,6 +186,6 @@ const IngredientsTable = (params: FusionIngredientsTableProps): JSX.Element => {
         return rowData;
     }, [params.ingredients, params.demonCompendium]);
     const dataProvider = new FusionIngredientsDataTableProvider(params, rowData);
-    return <DataTable dataTableProvider={dataProvider}/>
+    return <DataTable dataTableProvider={dataProvider} className={styles.dataTable}/>
 }
 export default React.memo(IngredientsTable);
