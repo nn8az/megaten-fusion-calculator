@@ -235,7 +235,13 @@ function removeDemonFromIngredients(demonId: number): void {
   setIngredients(newIngredients);
 }
 let ingredientsSettings: Models.IngredientsSettings = {};
-let settings: UserSettings;
+
+function initializeUserSettings(demonCompendium: DemonCompendium): UserSettings {
+  const settings = new UserSettings();
+  settings.useTripleFusion = demonCompendium.usePersonaTripleFusionMechanic;
+  settings.useTripleFusionSettingIsVisible = demonCompendium.usePersonaTripleFusionMechanic;
+  return settings;
+}
 
 export default function FusionByResultsCalculator(params: { demonCompendium: DemonCompendium }): JSX.Element {
   const { demonCompendium } = params;
@@ -243,11 +249,8 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
   let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
   const settingsPanelEventHandlers: SettingsPanelEventHandlers = {};
-  if (!settings) {
-    settings = new UserSettings();
-    settings.useTripleFusion = demonCompendium.usePersonaTripleFusionMechanic;
-    settings.useTripleFusionSettingIsVisible = demonCompendium.usePersonaTripleFusionMechanic;
-  }
+  let [wrappedSettings] = useState<UserSettings[]>([initializeUserSettings(demonCompendium)]);
+  const settings = wrappedSettings[0];
 
   const fusionResultSectionHeader = useRef<HTMLHeadingElement>(null);
 
