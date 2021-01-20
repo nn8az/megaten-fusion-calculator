@@ -8,14 +8,14 @@ import { DemonCompendium } from '../data/demon-compendium';
 // Imports for UI components
 import Button from '@material-ui/core/Button';
 import IngredientsTable from './ingredients-table';
-import FusionResultsTable from './fusion-results-table';
+import ResultsTable from './results-table';
 import SettingsPanel, { Settings, SettingsPanelEventHandlers } from './settings-panel';
 import DemonAdder from './demon-adder';
 
 import ReplayIcon from '@material-ui/icons/Replay';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SettingsIcon from '@material-ui/icons/Settings';
-import styles from './scss/fusion-recommender.module.scss';
+import styles from './scss/fusion-calculator.module.scss';
 
 const MAX_FUSION_INGREDIENT_HARD_CAP = 7;
 
@@ -226,7 +226,7 @@ function removeDemonFromIngredients(demonId: number): void {
 let ingredientsSettings: Models.IngredientsSettings = {};
 let settings: Settings;
 
-export default function FusionRecommender(params: { demonCompendium: DemonCompendium }): JSX.Element {
+export default function FusionByResultsCalculator(params: { demonCompendium: DemonCompendium }): JSX.Element {
   const { demonCompendium } = params;
   [ingredients, setIngredients] = useState<Models.Ingredients>({});
   let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
@@ -288,7 +288,7 @@ export default function FusionRecommender(params: { demonCompendium: DemonCompen
         ingredientsSettings={ingredientsSettings}
         onRemoveIngredient={removeDemonFromIngredients} />
       <h2 ref={fusionResultSectionHeader}>Results</h2>
-      <FusionResultsTable fusionResults={fusionResults} />
+      <ResultsTable fusionResults={fusionResults} />
     </div>
   );
 }

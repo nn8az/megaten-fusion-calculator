@@ -4,7 +4,7 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { DemonCompendium } from './data/demon-compendium';
-import FusionRecommender from './ui-components/fusion-recommender';
+import FusionByResultsCalculator from './ui-components/fusion-calculator';
 
 import './App.scss';
 
@@ -19,9 +19,9 @@ const theme = createMuiTheme({
 });
 
 // function loadDesu2DemonCompendium(callback: (demonCompendium: DemonCompendium) => void): void {
-//   const demonJsonPromise = import("./desu2/demons.json").then(importedJson => importedJson.default);
-//   const fusionChartJsonPromise = import("./desu2/fusion-chart.json").then(importedJson => importedJson.default);
-//   const presetJsonPromise = import("./desu2/presets.json").then(importedJson => importedJson.default);
+//   const demonJsonPromise = import("./data/desu2/demons.json").then(importedJson => importedJson.default);
+//   const fusionChartJsonPromise = import("./data/desu2/fusion-chart.json").then(importedJson => importedJson.default);
+//   const presetJsonPromise = import("./data/desu2/presets.json").then(importedJson => importedJson.default);
 //   Promise.all([demonJsonPromise, fusionChartJsonPromise, presetJsonPromise]).then(loadedJsons => {
 //     const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], undefined, loadedJsons[2]);
 //     callback(newDemonCompendium);
@@ -29,9 +29,9 @@ const theme = createMuiTheme({
 // }
 
 function loadPersona4GoldenDemonCompendium(callback: (demonCompendium: DemonCompendium) => void): void {
-  const demonJsonPromise = import("./p4g/demons.json").then(importedJson => importedJson.default);
-  const fusionChartJsonPromise = import("./p4g/fusion-chart.json").then(importedJson => importedJson.default);
-  const settingsJsonPromise = import("./p4g/fusion-settings.json").then(importedJson => importedJson.default);
+  const demonJsonPromise = import("./data/p4g/demons.json").then(importedJson => importedJson.default);
+  const fusionChartJsonPromise = import("./data/p4g/fusion-chart.json").then(importedJson => importedJson.default);
+  const settingsJsonPromise = import("./data/p4g/fusion-settings.json").then(importedJson => importedJson.default);
   Promise.all([demonJsonPromise, fusionChartJsonPromise, settingsJsonPromise]).then(loadedJsons => {
     const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], loadedJsons[2]);
     callback(newDemonCompendium);
@@ -47,7 +47,7 @@ export default function App(): JSX.Element {
     }
   }, [demonCompendium]);
 
-  let fusionRecommender: JSX.Element = (demonCompendium) ? <FusionRecommender demonCompendium={demonCompendium} /> : <React.Fragment />;
+  let fusionRecommender: JSX.Element = (demonCompendium) ? <FusionByResultsCalculator demonCompendium={demonCompendium} /> : <React.Fragment />;
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

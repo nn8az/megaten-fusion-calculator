@@ -6,7 +6,7 @@ import DataTable, * as DataTables from './data-table';
 import TableCell from '@material-ui/core/TableCell';
 import {WarningBanner} from './minor-ui-components';
 
-import styles from './scss/fusion-results-table.module.scss';
+import styles from './scss/results-table.module.scss';
 
 class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Models.FusedDemon> {
 
@@ -128,8 +128,8 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
 type FusionResultsTableProps = {
     fusionResults: Models.FusionResults
 }
-const FusionResultsTable = (params: FusionResultsTableProps): JSX.Element => {
+const ResultsTable = (params: FusionResultsTableProps): JSX.Element => {
     const dataProvider = new FusionResultsDataTableProvider(params);
     return <DataTable dataTableProvider={dataProvider} className={styles.dataTable}/>
 }
-export default React.memo(FusionResultsTable);
+export default React.memo(ResultsTable);
