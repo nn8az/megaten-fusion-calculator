@@ -1,26 +1,28 @@
 {
   "files": {
-    "main.css": "/megaten-fusion-recommender/static/css/main.e3b61613.chunk.css",
-    "main.js": "/megaten-fusion-recommender/static/js/main.222b53d7.chunk.js",
-    "main.js.map": "/megaten-fusion-recommender/static/js/main.222b53d7.chunk.js.map",
-    "runtime-main.js": "/megaten-fusion-recommender/static/js/runtime-main.58399806.js",
-    "runtime-main.js.map": "/megaten-fusion-recommender/static/js/runtime-main.58399806.js.map",
-    "static/js/2.18420c7c.chunk.js": "/megaten-fusion-recommender/static/js/2.18420c7c.chunk.js",
-    "static/js/2.18420c7c.chunk.js.map": "/megaten-fusion-recommender/static/js/2.18420c7c.chunk.js.map",
-    "static/js/3.f2114a66.chunk.js": "/megaten-fusion-recommender/static/js/3.f2114a66.chunk.js",
-    "static/js/3.f2114a66.chunk.js.map": "/megaten-fusion-recommender/static/js/3.f2114a66.chunk.js.map",
-    "static/js/4.8fcc0b67.chunk.js": "/megaten-fusion-recommender/static/js/4.8fcc0b67.chunk.js",
-    "static/js/4.8fcc0b67.chunk.js.map": "/megaten-fusion-recommender/static/js/4.8fcc0b67.chunk.js.map",
-    "static/js/5.c06afa65.chunk.js": "/megaten-fusion-recommender/static/js/5.c06afa65.chunk.js",
-    "static/js/5.c06afa65.chunk.js.map": "/megaten-fusion-recommender/static/js/5.c06afa65.chunk.js.map",
+    "main.css": "/megaten-fusion-recommender/static/css/main.905219c2.chunk.css",
+    "main.js": "/megaten-fusion-recommender/static/js/main.e575850f.chunk.js",
+    "main.js.map": "/megaten-fusion-recommender/static/js/main.e575850f.chunk.js.map",
+    "runtime-main.js": "/megaten-fusion-recommender/static/js/runtime-main.1d443e1b.js",
+    "runtime-main.js.map": "/megaten-fusion-recommender/static/js/runtime-main.1d443e1b.js.map",
+    "static/js/2.bc4847c4.chunk.js": "/megaten-fusion-recommender/static/js/2.bc4847c4.chunk.js",
+    "static/js/2.bc4847c4.chunk.js.map": "/megaten-fusion-recommender/static/js/2.bc4847c4.chunk.js.map",
+    "static/js/3.3eb16eb1.chunk.js": "/megaten-fusion-recommender/static/js/3.3eb16eb1.chunk.js",
+    "static/js/3.3eb16eb1.chunk.js.map": "/megaten-fusion-recommender/static/js/3.3eb16eb1.chunk.js.map",
+    "static/js/4.e913546a.chunk.js": "/megaten-fusion-recommender/static/js/4.e913546a.chunk.js",
+    "static/js/4.e913546a.chunk.js.map": "/megaten-fusion-recommender/static/js/4.e913546a.chunk.js.map",
+    "static/js/5.fe49763e.chunk.js": "/megaten-fusion-recommender/static/js/5.fe49763e.chunk.js",
+    "static/js/5.fe49763e.chunk.js.map": "/megaten-fusion-recommender/static/js/5.fe49763e.chunk.js.map",
+    "static/js/6.316e7a75.chunk.js": "/megaten-fusion-recommender/static/js/6.316e7a75.chunk.js",
+    "static/js/6.316e7a75.chunk.js.map": "/megaten-fusion-recommender/static/js/6.316e7a75.chunk.js.map",
     "index.html": "/megaten-fusion-recommender/index.html",
-    "static/css/main.e3b61613.chunk.css.map": "/megaten-fusion-recommender/static/css/main.e3b61613.chunk.css.map",
-    "static/js/2.18420c7c.chunk.js.LICENSE.txt": "/megaten-fusion-recommender/static/js/2.18420c7c.chunk.js.LICENSE.txt"
+    "static/css/main.905219c2.chunk.css.map": "/megaten-fusion-recommender/static/css/main.905219c2.chunk.css.map",
+    "static/js/2.bc4847c4.chunk.js.LICENSE.txt": "/megaten-fusion-recommender/static/js/2.bc4847c4.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.58399806.js",
-    "static/js/2.18420c7c.chunk.js",
-    "static/css/main.e3b61613.chunk.css",
-    "static/js/main.222b53d7.chunk.js"
+    "static/js/runtime-main.1d443e1b.js",
+    "static/js/2.bc4847c4.chunk.js",
+    "static/css/main.905219c2.chunk.css",
+    "static/js/main.e575850f.chunk.js"
   ]
 }
