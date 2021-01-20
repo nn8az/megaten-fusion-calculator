@@ -1,5 +1,5 @@
 // Imports for foundational functionalities
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Imports for data
 import * as Models from '../data/data-models';
@@ -17,7 +17,7 @@ import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SettingsIcon from '@material-ui/icons/Settings';
 import styles from './scss/fusion-calculator.module.scss';
 
-const MAX_FUSION_INGREDIENT_HARD_CAP = 7;
+const MAX_FUSION_INGREDIENT_HARD_CAP = 5;
 
 function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: Settings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
   const myFusionResults: Models.FusionResults = {};
@@ -216,6 +216,17 @@ function crissCrossFusedDemons(resultSpecies: Models.Demon, ingredientsSettings:
   return ret.filter(filterDemonsAfterCrissCross.bind(undefined, ingredientsSettings));;
 }
 
+function hasFusionResult(fusionResults: Models.FusionResults): boolean {
+  let hasFusionResult = false;
+  for (const ingCount in fusionResults) {
+    if (Number(ingCount) === 1) { continue; }
+    if (Object.keys(fusionResults[ingCount]).length > 0) { hasFusionResult = true; break; }
+  }
+  return hasFusionResult;
+}
+
+//====================================================================================================
+
 let ingredients: Models.Ingredients;
 let setIngredients: React.Dispatch<React.SetStateAction<Models.Ingredients>>;
 function removeDemonFromIngredients(demonId: number): void {
@@ -239,6 +250,12 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
   }
 
   const fusionResultSectionHeader = useRef<HTMLHeadingElement>(null);
+
+  useEffect(()=>{
+    if (hasFusionResult(fusionResults)) {
+      fusionResultSectionHeader.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [fusionResults]);
 
   function addDemonToIngredients(demons: Models.Demon[]): void {
     const newIngredients = { ...ingredients };
