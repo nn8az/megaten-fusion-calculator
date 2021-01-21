@@ -18,16 +18,9 @@
         }
 
         // MUI Pagination
-        :global(.MuiTablePagination-toolbar) {
-            flex-direction: column-reverse;
-        }
-
-        :global(.MuiTablePagination-spacer) {
-            display: none;
-        }
-
-        :global(.MuiTablePagination-actions) {
-            margin: 0;
+        :global(.MuiPagination-root) {
+            display: flex;
+            justify-content: center;
         }
     }
 }

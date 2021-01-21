@@ -252,11 +252,11 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
   let [wrappedSettings] = useState<UserSettings[]>([initializeUserSettings(demonCompendium)]);
   const settings = wrappedSettings[0];
 
-  const fusionResultSectionHeader = useRef<HTMLHeadingElement>(null);
+  const refResultsTable = useRef<HTMLHeadingElement>(null);
 
   useEffect(()=>{
     if (hasFusionResult(fusionResults)) {
-      fusionResultSectionHeader.current?.scrollIntoView({ behavior: "smooth" });
+      refResultsTable.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [fusionResults]);
 
@@ -307,8 +307,10 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
         ingredients={ingredients}
         ingredientsSettings={ingredientsSettings}
         onRemoveIngredient={removeDemonFromIngredients} />
-      <h2 ref={fusionResultSectionHeader}>Results</h2>
-      <ResultsTable fusionResults={fusionResults} />
+      <h2>Results</h2>
+      <div ref={refResultsTable}>
+        <ResultsTable fusionResults={fusionResults} />
+      </div>
     </div>
   );
 }

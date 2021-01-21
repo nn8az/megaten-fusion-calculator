@@ -133,5 +133,5 @@ type FusionResultsTableProps = {
 const ResultsTable = (params: FusionResultsTableProps): JSX.Element => {
     const dataProvider = new FusionResultsDataTableProvider(params);
     return <DataTable dataTableProvider={dataProvider} className={styles.dataTable}/>
-}
+};
 export default React.memo(ResultsTable);

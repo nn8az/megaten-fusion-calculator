@@ -6,11 +6,11 @@ import TableCell, { TableCellProps } from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper, { PaperProps } from '@material-ui/core/Paper';
 
 import styles from './scss/data-table.module.scss';
+import Pagination from '@material-ui/lab/Pagination';
 
 type StatePair<T> = [T, React.Dispatch<React.SetStateAction<T>>];
 export type SortSpec = {
@@ -39,6 +39,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     const [sortDirection, setSortDirection] = React.useState<"desc" | "asc" | undefined>(undefined);
     const [sortType, setSortType] = React.useState<"number" | "string">("string");
     const pageSize: number = dataTableProvider.pageSize;
+    let maxPage: number = 1;
 
     const colDefs: ColDef[] = dataTableProvider.getColumnDefinition();
     const preIdRowData: any[] = dataTableProvider.getAllRowsData();
@@ -47,7 +48,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     // Empty row banner
     if (totalRowCount === 0) {
         if (sortByCol !== undefined) { setSortByCol(undefined); }
-        if (page !== 0) { setPage(0); }
+        if (page !== 1) { setPage(1); }
         if (sortDirection !== undefined) { setSortDirection(undefined); }
         let ret = <React.Fragment />;
         let banner = dataTableProvider.renderBanner? dataTableProvider.renderBanner() : undefined;
@@ -56,9 +57,10 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     }
 
     // Shift page down if table loses rows
-    if (page * pageSize >= totalRowCount)
+    maxPage = Math.ceil(totalRowCount / pageSize);
+    if ((page - 1)* pageSize >= totalRowCount)
     {
-        setPage(Math.ceil(totalRowCount / pageSize - 1));
+        setPage(Math.ceil(totalRowCount / pageSize));
         return <React.Fragment />;
     }
 
@@ -77,9 +79,9 @@ const DataTable = (params: DataTableProps): JSX.Element => {
     }
 
     // Paginate
-    const paginizedRowData = rowData.filter((data, index) => (index >= page * pageSize) && (index < (page + 1) * pageSize));
-    function changePage(event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null, page: number) {
-        setPage(page);
+    const paginizedRowData = rowData.filter((data, index) => (index >= (page - 1) * pageSize) && (index < page * pageSize));
+    function changePage(event: React.ChangeEvent<unknown>, value: number) {
+        setPage(value);
     }
     
     // Render headers
@@ -119,17 +121,10 @@ const DataTable = (params: DataTableProps): JSX.Element => {
                     {renderedRows}
                 </TableBody>
             </Table>
-            <TablePagination
-                rowsPerPageOptions={[pageSize]}
-                component="div"
-                count={totalRowCount}
-                rowsPerPage={pageSize}
-                page={page}
-                onChangePage={changePage}
-            />
+            <Pagination count={maxPage} page={page} onChange={changePage} size="small" />
         </TableContainer>
     </Paper>
-}
+};
 export default DataTable;
 
 function stringComparitor(a: string, b: string): number {
