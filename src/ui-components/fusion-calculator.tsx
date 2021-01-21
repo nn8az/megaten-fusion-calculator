@@ -291,7 +291,7 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
   
   return (
     <div className={styles.fusionRecommender}>
-      <h2>Add demons to use as fusion ingredients</h2>
+      <h2>Add Demons to Use as Fusion Ingredients</h2>
       <div className={styles.addDemonsAndButtonsRowContainer}>
         <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredients} />
         <div className={styles.buttonsRow}>
