@@ -121,7 +121,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
                     {renderedRows}
                 </TableBody>
             </Table>
-            <Pagination count={maxPage} page={page} onChange={changePage} size="small" />
+            <Pagination count={maxPage} page={page} onChange={changePage} size="small" showFirstButton showLastButton />
         </TableContainer>
     </Paper>
 };
