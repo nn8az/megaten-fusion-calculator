@@ -1,4 +1,5 @@
-.fusionRecommender {
+.fusionCalculator {
+
     .addDemonsAndButtonsRowContainer {
         display: inline-flex;
         flex-direction: column;
@@ -16,6 +17,10 @@
     .calculateButton {
         margin-right: 6px;
         flex-grow: 2;
+    }
+
+    .section:not(:first-of-type) {
+        margin-top: 30px;
     }
 
     $calculate-button-color: #579737;

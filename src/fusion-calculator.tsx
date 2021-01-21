@@ -1,21 +1,21 @@
 // Imports for foundational functionalities
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 // Imports for data
-import * as Models from '../data/data-models';
-import { DemonCompendium } from '../data/demon-compendium';
+import * as Models from './data/data-models';
+import { DemonCompendium } from './data/demon-compendium';
 
 // Imports for UI components
 import Button from '@material-ui/core/Button';
-import IngredientsTable from './ingredients-table';
-import ResultsTable from './results-table';
-import SettingsPanel, { UserSettings, SettingsPanelEventHandlers } from './settings-panel';
-import DemonAdder from './demon-adder';
+import IngredientsTable from './ui-components/ingredients-table';
+import ResultsTable from './ui-components/results-table';
+import SettingsPanel, { UserSettings, SettingsPanelEventHandlers } from './ui-components/settings-panel';
+import DemonAdder from './ui-components/demon-adder';
 
 import ReplayIcon from '@material-ui/icons/Replay';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import SettingsIcon from '@material-ui/icons/Settings';
-import styles from './scss/fusion-calculator.module.scss';
+import styles from './fusion-calculator.module.scss';
 
 const MAX_FUSION_INGREDIENT_HARD_CAP = 5;
 
@@ -227,15 +227,6 @@ function hasFusionResult(fusionResults: Models.FusionResults): boolean {
 
 //====================================================================================================
 
-let ingredients: Models.Ingredients;
-let setIngredients: React.Dispatch<React.SetStateAction<Models.Ingredients>>;
-function removeDemonFromIngredients(demonId: number): void {
-  const newIngredients = { ...ingredients };
-  delete newIngredients[demonId];
-  setIngredients(newIngredients);
-}
-let ingredientsSettings: Models.IngredientsSettings = {};
-
 function initializeUserSettings(demonCompendium: DemonCompendium): UserSettings {
   const settings = new UserSettings();
   settings.useTripleFusion = demonCompendium.usePersonaTripleFusionMechanic;
@@ -245,12 +236,13 @@ function initializeUserSettings(demonCompendium: DemonCompendium): UserSettings 
 
 export default function FusionByResultsCalculator(params: { demonCompendium: DemonCompendium }): JSX.Element {
   const { demonCompendium } = params;
-  [ingredients, setIngredients] = useState<Models.Ingredients>({});
+  const [ingredients, setIngredients] = useState<Models.Ingredients>({});
   let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
   const settingsPanelEventHandlers: SettingsPanelEventHandlers = {};
-  let [wrappedSettings] = useState<UserSettings[]>([initializeUserSettings(demonCompendium)]);
-  const settings = wrappedSettings[0];
+  let [nonRenderingStates] = useState<[UserSettings, Models.IngredientsSettings]>([initializeUserSettings(demonCompendium), {}]);
+  const settings = nonRenderingStates[0];
+  const ingredientsSettings = nonRenderingStates[1];
 
   const refResultsTable = useRef<HTMLHeadingElement>(null);
 
@@ -259,6 +251,12 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
       refResultsTable.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [fusionResults]);
+
+  const removeDemonFromIngredients = useCallback(function (demonId: number): void {
+    const newIngredients = { ...ingredients };
+    delete newIngredients[demonId];
+    setIngredients(newIngredients);
+  }, [ingredients]);
 
   function addDemonToIngredients(demons: Models.Demon[]): void {
     const newIngredients = { ...ingredients };
@@ -281,7 +279,9 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
   function onResetButtonClick(): void {
     const newIngredients = {};
     setIngredients(newIngredients);
-    ingredientsSettings = {};
+    for (const key in ingredientsSettings) {
+      delete ingredientsSettings[key];
+    }
 
     const newFusionResults = {};
     setFusionResults(newFusionResults);
@@ -290,26 +290,32 @@ export default function FusionByResultsCalculator(params: { demonCompendium: Dem
   }
   
   return (
-    <div className={styles.fusionRecommender}>
-      <h2>Add Demons to Use as Fusion Ingredients</h2>
-      <div className={styles.addDemonsAndButtonsRowContainer}>
-        <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredients} />
-        <div className={styles.buttonsRow}>
-          <Button className={styles.calculateButton} variant="outlined" onClick={onCalculateButtonClick} disabled={Object.keys(ingredients).length === 0} ><PlayArrowIcon />Calculate</Button>
-          <Button className={styles.settingsButton} variant="outlined" onClick={onSettingsButtonClick}><SettingsIcon /></Button>
-          <Button className={styles.resetButton} variant="outlined" onClick={onResetButtonClick}><ReplayIcon />Reset</Button>
+    <div className={styles.fusionCalculator}>
+      <div className={styles.section}>
+        <h2>Add Demons to Use as Fusion Ingredients</h2>
+        <div className={styles.addDemonsAndButtonsRowContainer}>
+          <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredients} />
+          <div className={styles.buttonsRow}>
+            <Button className={styles.calculateButton} variant="outlined" onClick={onCalculateButtonClick} disabled={Object.keys(ingredients).length === 0} ><PlayArrowIcon />Calculate</Button>
+            <Button className={styles.settingsButton} variant="outlined" onClick={onSettingsButtonClick}><SettingsIcon /></Button>
+            <Button className={styles.resetButton} variant="outlined" onClick={onResetButtonClick}><ReplayIcon />Reset</Button>
+          </div>
         </div>
+        <SettingsPanel key={resetterKey} settings={settings} eventHandlers={settingsPanelEventHandlers} />
       </div>
-      <SettingsPanel key={resetterKey} settings={settings} eventHandlers={settingsPanelEventHandlers} />
-      <h2>Fusion Ingredients</h2>
-      <IngredientsTable 
-        demonCompendium={demonCompendium}
-        ingredients={ingredients}
-        ingredientsSettings={ingredientsSettings}
-        onRemoveIngredient={removeDemonFromIngredients} />
-      <h2>Results</h2>
-      <div ref={refResultsTable}>
-        <ResultsTable fusionResults={fusionResults} />
+      <div className={styles.section} hidden={Object.keys(ingredients).length === 0}>
+        <h2>Fusion Ingredients</h2>
+        <IngredientsTable 
+          demonCompendium={demonCompendium}
+          ingredients={ingredients}
+          ingredientsSettings={ingredientsSettings}
+          onRemoveIngredient={removeDemonFromIngredients} />
+      </div>
+      <div className={styles.section} hidden={!hasFusionResult(fusionResults)}>
+        <h2>Results</h2>
+        <div ref={refResultsTable}>
+          <ResultsTable fusionResults={fusionResults} />
+        </div>
       </div>
     </div>
   );

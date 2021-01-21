@@ -4,9 +4,9 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { DemonCompendium } from './data/demon-compendium';
-import FusionByResultsCalculator from './ui-components/fusion-calculator';
+import FusionByResultsCalculator from './fusion-calculator';
 
-import './App.scss';
+import './app.scss';
 import { Tab, Tabs } from '@material-ui/core';
 
 const theme = createMuiTheme({
