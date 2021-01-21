@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/megaten-fusion-recommender/static/css/main.de2dadf2.chunk.css",
+    "main.css": "/megaten-fusion-recommender/static/css/main.9e63b6c1.chunk.css",
     "main.js": "/megaten-fusion-recommender/static/js/main.be5a3eb7.chunk.js",
     "main.js.map": "/megaten-fusion-recommender/static/js/main.be5a3eb7.chunk.js.map",
     "runtime-main.js": "/megaten-fusion-recommender/static/js/runtime-main.5ca94ba5.js",
@@ -22,13 +22,13 @@
     "static/js/9.5a96a2dd.chunk.js": "/megaten-fusion-recommender/static/js/9.5a96a2dd.chunk.js",
     "static/js/9.5a96a2dd.chunk.js.map": "/megaten-fusion-recommender/static/js/9.5a96a2dd.chunk.js.map",
     "index.html": "/megaten-fusion-recommender/index.html",
-    "static/css/main.de2dadf2.chunk.css.map": "/megaten-fusion-recommender/static/css/main.de2dadf2.chunk.css.map",
+    "static/css/main.9e63b6c1.chunk.css.map": "/megaten-fusion-recommender/static/css/main.9e63b6c1.chunk.css.map",
     "static/js/2.a4f4c451.chunk.js.LICENSE.txt": "/megaten-fusion-recommender/static/js/2.a4f4c451.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.5ca94ba5.js",
     "static/js/2.a4f4c451.chunk.js",
-    "static/css/main.de2dadf2.chunk.css",
+    "static/css/main.9e63b6c1.chunk.css",
     "static/js/main.be5a3eb7.chunk.js"
   ]
 }
