@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import {WarningBanner} from './minor-ui-components';
 
 import styles from './scss/results-table.module.scss';
+import Button from '@material-ui/core/Button';
 
 class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Models.FusedDemon> {
 
@@ -35,6 +36,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
             for (const demonId in this.fusionResults[ingCount]) {
                 for (const fusedDemon of this.fusionResults[ingCount][demonId]) {
                     resultsAsRowsArray.push(fusedDemon);
+                    break;
                 }
             }
         }
@@ -66,7 +68,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
         }
         renderedRow.push(<React.Fragment key={keyId}>
             <TableCell>
-                {this.renderRecipe(fusedDemon)}
+            <Button variant="outlined" onClick={this.recipesButtonHandler.bind(undefined, fusedDemon.demon.id)} className={styles.addDemonButton}>Show all recipes</Button>
             </TableCell>
         </React.Fragment>);
         keyId++;
@@ -90,48 +92,26 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
         return <WarningBanner message="No results found" />
     }
 
-    private renderDemonName(demon: Models.FusedDemon): JSX.Element {
-        if (demon.isFused()) {
-            return <React.Fragment>{demon.demon.name}</React.Fragment>;
-        } else {
-            return <span className={styles.baseIngredientName}>{demon.demon.name}</span>;
-        }
-    }
-
-    private renderRecipe(demon: Models.FusedDemon): JSX.Element {
-    let priorRecipes: JSX.Element = <React.Fragment/>;
-    if (demon.ingredients) {
-        let curRecipe: JSX.Element = <React.Fragment/>;
-        let isFirstLoop: boolean = true;
-        for (const ingDemon of demon.ingredients) {
-            priorRecipes = <React.Fragment>{priorRecipes}{this.renderRecipe(ingDemon)}</React.Fragment>;
-            const separator = isFirstLoop ? undefined : <React.Fragment> + </React.Fragment>;
-            curRecipe = <React.Fragment>{curRecipe}{separator}{this.renderDemonName(ingDemon)}</React.Fragment>
-            isFirstLoop = false;
-        }
-        const nameR = this.renderDemonName(demon);
-        return <React.Fragment>
-            {priorRecipes}
-            <div className={styles.recipeLine}>
-                {curRecipe} = {nameR}
-            </div>
-        </React.Fragment>;
-    }
-    return priorRecipes;
-}
-
     fusionResults: Models.FusionResults;
+    recipesButtonHandler: (...x: any) => void;
 
-    constructor(params: FusionResultsTableProps) {
+    constructor(params: FusionResultsTableProps, onRecipesButtonClick: (demonId: number) => void) {
+        this.recipesButtonHandler = onRecipesButtonClick;
         this.fusionResults = params.fusionResults;
     }
 }
 
 type FusionResultsTableProps = {
-    fusionResults: Models.FusionResults
+    fusionResults: Models.FusionResults,
+    onOpenDemonRecipes: (demonId: number) => void
 }
-const ResultsTable = (params: FusionResultsTableProps): JSX.Element => {
-    const dataProvider = new FusionResultsDataTableProvider(params);
+const ResultsTable = (props: FusionResultsTableProps): JSX.Element => {
+
+    function openDemonRecipesHandler(demonId: number) {
+      props.onOpenDemonRecipes(demonId);
+    }
+    
+    const dataProvider = new FusionResultsDataTableProvider(props, openDemonRecipesHandler);
     return <DataTable dataTableProvider={dataProvider} className={styles.dataTable}/>
 };
 export default React.memo(ResultsTable);

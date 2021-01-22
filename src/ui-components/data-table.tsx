@@ -34,7 +34,7 @@ interface DataTableProps extends PaperProps {
 }
 const DataTable = (params: DataTableProps): JSX.Element => {
     const {dataTableProvider} = params;
-    const [page, setPage] = React.useState<number>(0);
+    const [page, setPage] = React.useState<number>(1);
     const [sortByCol, setSortByCol] = React.useState<number | undefined>(undefined);
     const [sortDirection, setSortDirection] = React.useState<"desc" | "asc" | undefined>(undefined);
     const [sortType, setSortType] = React.useState<"number" | "string">("string");

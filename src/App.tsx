@@ -1,5 +1,5 @@
 import React from 'react';
-import {Route, Switch, useHistory, useParams, useRouteMatch} from 'react-router-dom';
+import {useHistory, useParams} from 'react-router-dom';
 
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,7 +9,6 @@ import FusionCalculator from './fusion-calculator';
 
 import './app.scss';
 import { Tab, Tabs } from '@material-ui/core';
-import DemonDisplayer from './demon-displayer';
 
 const theme = createMuiTheme({
   palette: {
@@ -65,7 +64,7 @@ const urlParamToGameMap: { [gameStr: string]: Game } = {
   desu2: Game.devilSurvivor2
 }
 
-function getGameUrlParam(game: Game): string | undefined {
+function getGameUrlPath(game: Game): string | undefined {
   for (const gameStrCode in urlParamToGameMap) {
     if (urlParamToGameMap[gameStrCode] === game) {
       return gameStrCode;
@@ -76,26 +75,27 @@ function getGameUrlParam(game: Game): string | undefined {
 export default function App(): JSX.Element {
   const urlParams = useParams<{gameStrCode: string}>();
   const [demonCompendium, setDemonCompendium] = React.useState<DemonCompendium | undefined>(undefined);
-  const [currentGameData, setCurrentGameData] = React.useState<Game>(Game.person4Golden);
+  const [currentGame, setCurrentGame] = React.useState<Game>(Game.person4Golden);
 
   React.useEffect(()=>{
-      loadGameData(currentGameData, setDemonCompendium);
-  }, [currentGameData]);
+      loadGameData(currentGame, setDemonCompendium);
+  }, [currentGame]);
   
   const history = useHistory();
-  const changeGameTab = (event: React.ChangeEvent<{}> | undefined, gameId: Game) => {
-    setDemonCompendium(undefined);
-    history.push("/" + getGameUrlParam(gameId));
+  
+  const changeGameTabHandler = (event: React.ChangeEvent<{}> | undefined, gameId: Game) => {
+    if (gameId !== currentGame) {
+      setDemonCompendium(undefined);
+    }
+    history.push("/" + getGameUrlPath(gameId));
   };
-
-  const routeMatcher = useRouteMatch();
 
   const gameFromUrlParam: Game | undefined = urlParamToGameMap[urlParams.gameStrCode];
   if (gameFromUrlParam === undefined) {
-    changeGameTab(undefined, Game.person4Golden);
+    changeGameTabHandler(undefined, Game.person4Golden);
     return <React.Fragment />
-  } else if (gameFromUrlParam !== currentGameData) {
-    setCurrentGameData(gameFromUrlParam);
+  } else if (gameFromUrlParam !== currentGame) {
+    setCurrentGame(gameFromUrlParam);
     return <React.Fragment />
   }
 
@@ -111,20 +111,13 @@ export default function App(): JSX.Element {
         <header>
           <h1>MegaTen Fusion by Results Calculator</h1>
         </header>
-        <Tabs value={currentGameData} onChange={changeGameTab}>
+        <Tabs value={currentGame} onChange={changeGameTabHandler}>
           <Tab label="Persona 4 Golden" />
           <Tab label="Devil Survivor 2" />
         </Tabs>
 
         <div className="appBody">
-          <Switch>
-            <Route path={`${routeMatcher.path}/demon/:demonId`}>
-              <DemonDisplayer demonCompendium={demonCompendium} invalidUrlRedirect={routeMatcher.path}/>
-            </Route>
-            <Route path={`${routeMatcher.path}/`}>
-              <FusionCalculator demonCompendium={demonCompendium} />
-            </Route>
-          </Switch>
+          <FusionCalculator demonCompendium={demonCompendium} />
         </div>
 
       </div>

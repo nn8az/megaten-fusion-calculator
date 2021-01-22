@@ -1,0 +1,28 @@
+.recipeTable {
+    display: flex;
+    flex-wrap: wrap;
+
+    .baseIngredientName {
+        color: aqua;
+    }
+
+    .recipeCard:global(.MuiCard-root) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px;
+        min-width: 300px;
+        min-height: 80px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+
+        :global(.MuiCardContent-root) {
+            padding: 0px;
+            display: inline-block;
+
+            > div {
+                display: inline-block;
+            }
+        }
+    }
+}
