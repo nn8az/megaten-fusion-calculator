@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import {Route, Switch, useHistory, useParams, useRouteMatch} from 'react-router-dom';
 
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { DemonCompendium } from './data/demon-compendium';
-import FusionByResultsCalculator from './fusion-calculator';
+import FusionCalculator from './fusion-calculator';
 
 import './app.scss';
 import { Tab, Tabs } from '@material-ui/core';
+import DemonDisplayer from './demon-displayer';
 
 const theme = createMuiTheme({
   palette: {
@@ -39,17 +41,17 @@ function loadPersona4GoldenDemonCompendium(setLoadedCompendiumCallback: (demonCo
   })
 }
 
-enum GameTab {
+export enum Game {
   person4Golden = 0,
   devilSurvivor2 = 1
 }
 
-function loadGameData(game: GameTab, setLoadedCompendiumCallback: (demonCompendium: DemonCompendium) => void): void {
+function loadGameData(game: Game, setLoadedCompendiumCallback: (demonCompendium: DemonCompendium) => void): void {
   switch(game) {
-    case GameTab.person4Golden:
+    case Game.person4Golden:
       loadPersona4GoldenDemonCompendium(setLoadedCompendiumCallback);
       break;
-    case GameTab.devilSurvivor2:
+    case Game.devilSurvivor2:
       loadDesu2DemonCompendium(setLoadedCompendiumCallback);
       break;
     default:
@@ -58,34 +60,73 @@ function loadGameData(game: GameTab, setLoadedCompendiumCallback: (demonCompendi
   }
 }
 
+const urlParamToGameMap: { [gameStr: string]: Game } = {
+  p4g: Game.person4Golden,
+  desu2: Game.devilSurvivor2
+}
+
+function getGameUrlParam(game: Game): string | undefined {
+  for (const gameStrCode in urlParamToGameMap) {
+    if (urlParamToGameMap[gameStrCode] === game) {
+      return gameStrCode;
+    }
+  }
+}
+
 export default function App(): JSX.Element {
-  const [demonCompendium, setDemonCompendium] = useState<DemonCompendium | undefined>(undefined);
-  const [gameTabPosition, setGameTabPosition] = useState<GameTab>(GameTab.person4Golden);
+  const urlParams = useParams<{gameStrCode: string}>();
+  const [demonCompendium, setDemonCompendium] = React.useState<DemonCompendium | undefined>(undefined);
+  const [currentGameData, setCurrentGameData] = React.useState<Game>(Game.person4Golden);
 
-  useEffect(()=>{
-    loadGameData(gameTabPosition, setDemonCompendium);
-  }, [gameTabPosition]);
-
-  const handleGameTabChange = (event: React.ChangeEvent<{}>, newValue: GameTab) => {
+  React.useEffect(()=>{
+      loadGameData(currentGameData, setDemonCompendium);
+  }, [currentGameData]);
+  
+  const history = useHistory();
+  const changeGameTab = (event: React.ChangeEvent<{}> | undefined, gameId: Game) => {
     setDemonCompendium(undefined);
-    setGameTabPosition(newValue);
+    history.push("/" + getGameUrlParam(gameId));
   };
 
-  let fusionRecommender: JSX.Element | undefined = (demonCompendium) ? <FusionByResultsCalculator demonCompendium={demonCompendium} /> : undefined;
+  const routeMatcher = useRouteMatch();
+
+  const gameFromUrlParam: Game | undefined = urlParamToGameMap[urlParams.gameStrCode];
+  if (gameFromUrlParam === undefined) {
+    changeGameTab(undefined, Game.person4Golden);
+    return <React.Fragment />
+  } else if (gameFromUrlParam !== currentGameData) {
+    setCurrentGameData(gameFromUrlParam);
+    return <React.Fragment />
+  }
+
+  if (!demonCompendium) {
+    return <React.Fragment />
+  }
+  
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="myApp">
+
         <header>
           <h1>MegaTen Fusion by Results Calculator</h1>
         </header>
-        <Tabs value={gameTabPosition} onChange={handleGameTabChange} aria-label="simple tabs example">
+        <Tabs value={currentGameData} onChange={changeGameTab}>
           <Tab label="Persona 4 Golden" />
           <Tab label="Devil Survivor 2" />
         </Tabs>
+
         <div className="appBody">
-          {fusionRecommender}
+          <Switch>
+            <Route path={`${routeMatcher.path}/demon/:demonId`}>
+              <DemonDisplayer demonCompendium={demonCompendium} invalidUrlRedirect={routeMatcher.path}/>
+            </Route>
+            <Route path={`${routeMatcher.path}/`}>
+              <FusionCalculator demonCompendium={demonCompendium} />
+            </Route>
+          </Switch>
         </div>
+
       </div>
     </ThemeProvider>);
 }

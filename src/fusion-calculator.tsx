@@ -234,16 +234,17 @@ function initializeUserSettings(demonCompendium: DemonCompendium): UserSettings 
   return settings;
 }
 
-export default function FusionByResultsCalculator(params: { demonCompendium: DemonCompendium }): JSX.Element {
+export default function FusionCalculator(params: { demonCompendium: DemonCompendium }): JSX.Element {
   const { demonCompendium } = params;
+
   const [ingredients, setIngredients] = useState<Models.Ingredients>({});
   let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
-  const settingsPanelEventHandlers: SettingsPanelEventHandlers = {};
+
   let [nonRenderingStates] = useState<[UserSettings, Models.IngredientsSettings]>([initializeUserSettings(demonCompendium), {}]);
   const settings = nonRenderingStates[0];
   const ingredientsSettings = nonRenderingStates[1];
-
+  const settingsPanelEventHandlers: SettingsPanelEventHandlers = {};
   const refResultsTable = useRef<HTMLHeadingElement>(null);
 
   useEffect(()=>{
