@@ -1,6 +1,6 @@
 .dataTable {
     width: 100%;
-    min-width: 900px;
+    min-width: 600px;
 
     table {
         display: block;
@@ -28,29 +28,40 @@
 
         td, th {
             display: block;
-            flex-basis: 200%;
+            flex-basis: 150px;
             word-wrap: break-word;
+            min-width: 110px;
         }
 
         .nameColumn {
-            flex-basis: 20%;
-            min-width: 100px;
+            flex-basis: 100%;
             word-wrap: break-word;
+            min-width: 75px;
         }
 
         .lvlColumn {
-            flex-basis: 70px;
-            min-width: 70px;
+            flex-basis: 40%;
+            min-width: 35px;
         }
 
         .raceColumn {
-            flex-basis: 15%;
-            min-width: 90px;
+            flex-basis: 80%;
+            min-width: 50px;
         }
 
         .statColumn {
-            flex-basis: 50px;
-            min-width: 50px;
+            flex-basis: 40%;
+            min-width: 35px;
+        }
+
+        $recipeButtonBackgroundColor: rgb(40, 130, 190);
+        .recipeButton {
+            background-color: $recipeButtonBackgroundColor;
+            border-width: 2px;
+
+            &:hover {
+                background-color: lighten($recipeButtonBackgroundColor, 10);
+            }
         }
     }
 }

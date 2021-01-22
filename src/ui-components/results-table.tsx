@@ -25,7 +25,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
                 { headerContent: statsName[i], headerProps: { className: styles.statColumn }, sortSpec: { sortType: "number" } }
             );
         }
-        colDefs.push({ headerContent: "Recipe" });
+        colDefs.push({ headerContent: "" });
         return colDefs;
     }
 
@@ -68,7 +68,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
         }
         renderedRow.push(<React.Fragment key={keyId}>
             <TableCell>
-            <Button variant="outlined" onClick={this.recipesButtonHandler.bind(undefined, fusedDemon.demon.id)} className={styles.addDemonButton}>Show all recipes</Button>
+            <Button variant="outlined" onClick={this.recipesButtonHandler.bind(undefined, fusedDemon.demon.id)} className={styles.recipeButton}>View recipes</Button>
             </TableCell>
         </React.Fragment>);
         keyId++;
