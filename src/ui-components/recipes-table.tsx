@@ -34,7 +34,7 @@ function renderRecipe(demon: Models.FusedDemon): JSX.Element {
         return <React.Fragment>
             {priorRecipes}
             <Divider light />
-            <div>{curRecipe}</div><div>&darr;</div><div>{nameR}</div>
+            <div className={styles.centerText}>{curRecipe}</div><div>&darr;</div><div>{nameR}</div>
         </React.Fragment>;
     }
     return priorRecipes;
