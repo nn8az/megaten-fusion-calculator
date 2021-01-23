@@ -1,27 +1,37 @@
-.recipeTable {
+.componentContainer {
     display: flex;
-    flex-wrap: wrap;
+    flex-flow: column;
+    align-items: center;
 
-    .baseIngredientName {
-        color: aqua;
+    .pagination {
+        margin-bottom: 10px;
     }
 
-    .recipeCard:global(.MuiCard-root) {
+    .recipeTable {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 5px;
-        min-width: 300px;
-        min-height: 80px;
-        margin-right: 10px;
-        margin-bottom: 10px;
+        flex-wrap: wrap;
+        width: 100%;
 
-        :global(.MuiCardContent-root) {
-            padding: 0px;
-            display: inline-block;
+        .baseIngredientName {
+            color: aqua;
+        }
 
-            > div {
+        .recipeCard:global(.MuiCard-root) {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            width: 200px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+
+            :global(.MuiCardContent-root) {
+                padding: 0px;
                 display: inline-block;
+
+                > div {
+                    display: inline-block;
+                }
             }
         }
     }
