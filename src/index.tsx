@@ -10,7 +10,11 @@ import { createBrowserHistory } from 'history';
 
 import App from './app';
 
+ReactDOM.render(<GitHubPageRedirect />,
+  document.getElementById('gitHubPageRedirector'));
+
 const history = createBrowserHistory();
+
 ReactDOM.render(
   <React.StrictMode>
     <Router history={history}>
@@ -23,9 +27,6 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
-
-ReactDOM.render(<GitHubPageRedirect />,
-document.getElementById('gitHubPageRedirector'));
 
 function GitHubPageRedirect(): JSX.Element {
   // Single Page Apps for GitHub Pages
