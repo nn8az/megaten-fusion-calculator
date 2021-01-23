@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/megaten-fusion-recommender/static/css/main.33d244aa.chunk.css",
-    "main.js": "/megaten-fusion-recommender/static/js/main.3dc9293b.chunk.js",
-    "main.js.map": "/megaten-fusion-recommender/static/js/main.3dc9293b.chunk.js.map",
+    "main.js": "/megaten-fusion-recommender/static/js/main.3057e42f.chunk.js",
+    "main.js.map": "/megaten-fusion-recommender/static/js/main.3057e42f.chunk.js.map",
     "runtime-main.js": "/megaten-fusion-recommender/static/js/runtime-main.b5757ea5.js",
     "runtime-main.js.map": "/megaten-fusion-recommender/static/js/runtime-main.b5757ea5.js.map",
     "static/js/2.1d20f31d.chunk.js": "/megaten-fusion-recommender/static/js/2.1d20f31d.chunk.js",
@@ -29,6 +29,6 @@
     "static/js/runtime-main.b5757ea5.js",
     "static/js/2.1d20f31d.chunk.js",
     "static/css/main.33d244aa.chunk.css",
-    "static/js/main.3dc9293b.chunk.js"
+    "static/js/main.3057e42f.chunk.js"
   ]
 }
