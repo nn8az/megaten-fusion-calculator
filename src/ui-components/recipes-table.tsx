@@ -34,7 +34,7 @@ function renderRecipe(demon: Models.FusedDemon): JSX.Element {
         return <React.Fragment>
             {priorRecipes}
             <Divider light />
-            <div>{curRecipe}</div><div> = {nameR}</div>
+            <div>{curRecipe}</div><div>&darr;</div><div>{nameR}</div>
         </React.Fragment>;
     }
     return priorRecipes;
@@ -114,14 +114,16 @@ export default function RecipesTable(props: {demonId: number, recipesAry: Models
             <Autocomplete
             multiple
             className={styles.filterField}
+            size="small"
             onChange={handleFilterChange}
             value={filter}
             defaultValue={filter}
             options={filterOptions}
             getOptionLabel={(option) => option.demonName}
             getOptionSelected={(option, value) => option.demonId === value.demonId}
+            autoHighlight={true}
             filterSelectedOptions
-            renderInput={(params) => (<TextField {...params} variant="outlined" label="Filter by Ingredient Demons" /> )}
+            renderInput={(params) => (<TextField {...params} variant="outlined" label="Filter" /> )}
         />
         <Pagination count={maxPage} page={page} onChange={handlePageChange} size="small" className={styles.pagination} hidden={maxPage <= 1}/>
         <div className={styles.recipeCardsContainer}>

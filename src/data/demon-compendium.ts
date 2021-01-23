@@ -1,7 +1,5 @@
 import * as Models from './data-models';
 
-const ELEMENT_RACE: string = "Element";
-
 type DemonInfo = { lvl: number, race: string, stats: number[] };
 type DemonJson = { demons: {[demonName: string]: DemonInfo}, statsName: string[] };
 type FusionSettingsJson = {
@@ -81,9 +79,9 @@ export class DemonCompendium {
     public fuseDemons(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
         if (demonA.id === demonB.id && this.disableSameDemonFusion) { return undefined; }
         
-        if (demonA.race === ELEMENT_RACE && demonB.race === ELEMENT_RACE) {
+        if (this.isElement(demonA) && this.isElement(demonB)) {
             return undefined;
-        } else if (demonA.race === ELEMENT_RACE || demonB.race === ELEMENT_RACE) {
+        } else if (this.isElement(demonA) || this.isElement(demonB)) {
             return this.fuseDemonWithElement(demonA, demonB);
         } else if (demonA.race === demonB.race) {
             return this.fuseDemonSameRaceNoElement(demonA, demonB);
@@ -410,21 +408,25 @@ export class DemonCompendium {
 
     private fuseDemonWithElement(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
         let element, demon;
-        if (demonA.race === ELEMENT_RACE) {
+        if (this.isElement(demonA)) {
             element = demonA;
             demon = demonB;
-        } else if (demonB.race === ELEMENT_RACE) {
+        } else if (this.isElement(demonB)) {
             element = demonB;
             demon = demonA;
         } else {
             return this.fuseDemonSameRaceNoElement(demonA, demonB);
         }
 
-        const demonRankChange = this.elementFusionChart[demon.race][element.rank];
+        const demonRankChange = (this.elementFusionChart[demon.race] || {})[element.id];
         if (demonRankChange === undefined) { return undefined; }
         const lvlTable: number[] = this.getLvlTableForRace(demon.race);
         const resultRank: number = demon.rank + demonRankChange;
         if (resultRank < 0 || resultRank >= lvlTable.length) { return undefined; }
         return this.getDemonFromRaceLvl(demon.race, lvlTable[resultRank]);
+    }
+
+    private isElement(demon: Models.Demon): boolean {
+        return this.elementsMap[demon.id] !== undefined;
     }
 }

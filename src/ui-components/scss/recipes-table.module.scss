@@ -37,11 +37,14 @@
         
         :global(.MuiCardContent-root) {
             padding: 0px;
-            display: inline-block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             width: 100%;
 
             hr {
                 margin: 2px 0;
+                width: 100%;
 
                 &:first-of-type {
                     display: none;

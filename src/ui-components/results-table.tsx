@@ -25,7 +25,9 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
                 { headerContent: statsName[i], headerProps: { className: styles.statColumn }, sortSpec: { sortType: "number" } }
             );
         }
+        colDefs.push({ headerContent: "Ingredients Used", sortSpec: { sortType: "number" }, headerProps: { className: styles.ingredientsColumn } });
         colDefs.push({ headerContent: "" });
+        this.columnCount = colDefs.length;
         return colDefs;
     }
 
@@ -67,6 +69,12 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
             keyId++;
         }
         renderedRow.push(<React.Fragment key={keyId}>
+            <TableCell className={styles.ingredientsColumn}>
+                {Object.keys(fusedDemon.getBaseIngredientsCounts()).length}
+            </TableCell>
+        </React.Fragment>);
+        keyId++;
+        renderedRow.push(<React.Fragment key={keyId}>
             <TableCell>
             <Button variant="outlined" onClick={this.recipesButtonHandler.bind(undefined, fusedDemon.demon.id)} className={styles.recipeButton}>View recipes</Button>
             </TableCell>
@@ -83,6 +91,8 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
                 return rowData.demon.lvl; }
             case 2: { 
                 return rowData.demon.race; }
+            case (this.columnCount - 2):
+                return Object.keys(rowData.getBaseIngredientsCounts()).length;
             default: {
                 return rowData.demon.stats[sortByCol-3]; }
         };
@@ -94,6 +104,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
 
     fusionResults: Models.FusionResults;
     recipesButtonHandler: (...x: any) => void;
+    columnCount: number = 0;
 
     constructor(params: FusionResultsTableProps, onRecipesButtonClick: (demonId: number) => void) {
         this.recipesButtonHandler = onRecipesButtonClick;

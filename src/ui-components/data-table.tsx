@@ -69,7 +69,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
 
     // Sort rows
     if ((sortByCol !== undefined) && (sortDirection !== undefined) && (dataTableProvider.getSortValue !== undefined)) {
-        const getSortValue = dataTableProvider.getSortValue;
+        const getSortValue = dataTableProvider.getSortValue.bind(dataTableProvider);
         const sortMult: number = (sortDirection === "asc") ? 1 : -1;
         const comparitor: (...x: any) => number = (sortType === "number") ? numberComparitor : stringComparitor;
         rowData.sort((a, b) => { 

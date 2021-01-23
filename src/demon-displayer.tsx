@@ -1,10 +1,11 @@
-import Button from '@material-ui/core/Button';
 import React from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import * as Models from './data/data-models';
 import { DemonCompendium } from './data/demon-compendium';
 import RecipesTable from './ui-components/recipes-table';
+
+import styles from './demon-displayer.module.scss';
 
 export default function DemonDisplayer(props: { demonCompendium: DemonCompendium, goBackUrlPath: string, fusionResults?: Models.FusionResults}): JSX.Element {
     const demonIdStr = useParams<{ demonId: string }>().demonId;
@@ -19,10 +20,6 @@ export default function DemonDisplayer(props: { demonCompendium: DemonCompendium
     if (!demon) {
         history.push(props.goBackUrlPath);
         return <React.Fragment/>;
-    }
-
-    function goBackHandler() {
-        history.push(props.goBackUrlPath);
     }
     
     let fusionResultsSection: JSX.Element | undefined = undefined;
@@ -47,12 +44,19 @@ export default function DemonDisplayer(props: { demonCompendium: DemonCompendium
         }
     }
 
-    return <div>
-        <Button variant="outlined" onClick={goBackHandler}>Go back</Button>
-        <h2>{demon.name}</h2>
-        <div><b>Race:</b> {demon.race} | <b>Lvl:</b> {demon.lvl}</div>
-        <h2>Stats</h2>
-        <div>{demon.stats.map((stat, i) => <React.Fragment key={i}>{(i > 0)?<React.Fragment children={" | "}/>: undefined}<b>{Models.Demon.statsName[i]}:</b> {stat}</React.Fragment>)}</div>
-        <div>{fusionResultsSection}</div>
+    return <div className={styles.componentContainer}>
+        <div className={styles.section}>
+            <h2>{demon.name}</h2>
+            <div><Label text="Race" />{demon.race}<Label text="Level" />{demon.lvl}</div>
+        </div>
+        <div className={styles.section}>
+            <h2>Stats</h2>
+            <div>{demon.stats.map((stat, i) => <React.Fragment key={i}><Label text={Models.Demon.statsName[i]} />{stat}</React.Fragment>)}</div>
+        </div>
+        <div className={styles.section}>{fusionResultsSection}</div>
     </div>
+}
+
+function Label(props: { text: string }): JSX.Element {
+    return <span className={styles.label}>{props.text}</span>;
 }

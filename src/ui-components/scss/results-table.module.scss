@@ -54,6 +54,11 @@
             min-width: 35px;
         }
 
+        .ingredientsColumn {
+            flex-basis: 40%;
+            min-width: 35px;
+        }
+
         $recipeButtonBackgroundColor: rgb(40, 130, 190);
         .recipeButton {
             background-color: $recipeButtonBackgroundColor;
