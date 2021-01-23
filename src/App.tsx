@@ -86,7 +86,7 @@ export default function App(): JSX.Element {
     if (gameId !== currentGame) {
       setDemonCompendium(undefined);
     }
-    history.push("/" + getGameUrlPath(gameId));
+    history.push("/megaten-fusion-recommender/" + getGameUrlPath(gameId));
   };
 
   const gameFromUrlParam: Game | undefined = urlParamToGameMap[urlParams.gameStrCode];
