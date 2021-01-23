@@ -70,9 +70,10 @@ function AddByDemon(params: {
             onKeyPress={onKeyPress}
             getOptionLabel={(option) => option.name}
             getOptionSelected={(option, value) => { return option.id === value.id }}
-            style={{ width: 300 }}
+            style={{ width: 250 }}
             autoHighlight={true}
             autoSelect={true}
+            size="small"
             renderInput={(params) => <TextField {...params} label="Enter demon name" variant="outlined" />}
         />
         <AddButton onClick={onAddButtonClick} />
@@ -128,7 +129,7 @@ function AddByLevelRange(params: {
             <div className={styles.lvlFieldsContainer}>
                 <TextField
                     label="Min Lv"
-                    style={{ width: "147px" }}
+                    style={{ width: "122px" }}
                     type="number"
                     InputLabelProps={{
                         shrink: true,
@@ -137,10 +138,11 @@ function AddByLevelRange(params: {
                     value={minLvl}
                     onChange={onChange.bind(undefined, setMinLvl)}
                     onKeyPress={onKeyPress}
+                    size="small"
                 />
                 <TextField
                     label="Max Lv"
-                    style={{ width: "147px" }}
+                    style={{ width: "122px" }}
                     type="number"
                     InputLabelProps={{
                         shrink: true,
@@ -148,6 +150,7 @@ function AddByLevelRange(params: {
                     variant="outlined"
                     value={maxLvl}
                     onKeyPress={onKeyPress}
+                    size="small"
                     onChange={onChange.bind(undefined, setMaxLvl)}
                 />
             </div>
@@ -202,9 +205,10 @@ function AddByPreset(params: {
             onKeyPress={onKeyPress}
             getOptionLabel={(option) => option.preset.caption}
             getOptionSelected={(option, value) => { return option.id === value.id }}
-            style={{ width: 300 }}
+            style={{ width: 250 }}
             autoHighlight={true}
             autoSelect={true}
+            size="small"
             renderInput={(params) => <TextField {...params} label="Select a preset" variant="outlined" />}
         />
         <AddButton onClick={onAddButtonClick} />

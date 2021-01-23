@@ -12,7 +12,7 @@
     h1 {
         color: rgb(30, 30, 30);
         padding-left: 5px;
-        font-size: 40px;
+        font-size: 3vh;
         background-color: $headerBackgroundColor;
     }
 
@@ -24,9 +24,17 @@
     // Tabs
     .MuiTabs-root {
         background-color: rgba(0, 0, 0, 0.3);
+        min-height: auto;
+    }
+
+    .MuiTab-root {
+        min-height: auto;
+        padding: 0;
+        text-transform: none;
     }
 
     .MuiTabs-indicator {
+        width: 160px;
         background-color: $headerBackgroundColor;
     }
 

@@ -15,8 +15,7 @@ const theme = createMuiTheme({
     type: "dark",
   },
   typography: {
-    fontFamily: "sans-serif",
-    fontSize: 14
+    fontFamily: "sans-serif"
   }
 });
 
