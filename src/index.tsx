@@ -15,10 +15,7 @@ ReactDOM.render(
   <React.StrictMode>
     <Router history={history}>
       <Switch>
-        <Route path={`/:gameStrCode`}>
-          <App/>
-        </Route>
-        <Route path="/">
+        <Route path={["/:gameStrCode?","/"]}>
           <App/>
         </Route>
       </Switch>
