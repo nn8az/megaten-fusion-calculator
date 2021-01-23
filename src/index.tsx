@@ -1,12 +1,28 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
+import {
+  Switch,
+  Route,
+  Router
+} from 'react-router-dom';
+import { createBrowserHistory } from 'history';
 
 import App from './app';
 
+const history = createBrowserHistory();
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router history={history}>
+      <Switch>
+        <Route path={`/:gameStrCode`}>
+          <App/>
+        </Route>
+        <Route path="/">
+          <App/>
+        </Route>
+      </Switch>
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );

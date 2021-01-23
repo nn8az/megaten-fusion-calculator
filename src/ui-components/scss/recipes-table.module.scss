@@ -1,0 +1,60 @@
+.componentContainer {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+
+    .filterField {
+        min-width: 300px;
+        max-width: 600px;
+        align-self: flex-start;
+        margin-top: 5px;
+        margin-bottom: 10px;
+
+        :global(.MuiFormLabel-root){
+            font-size: 14px;
+        }
+    }
+
+    .pagination {
+        margin-bottom: 10px;
+    }
+
+    .recipeCardsContainer {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        
+    }
+
+    .recipeCard:global(.MuiCard-root) {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5px;
+        width: 200px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        
+        :global(.MuiCardContent-root) {
+            padding: 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+
+            hr {
+                margin: 2px 0;
+                width: 100%;
+
+                &:first-of-type {
+                    display: none;
+                }
+            }
+        }
+    }
+
+    .baseIngredientName {
+        color: aqua;
+    }
+
+}

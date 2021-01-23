@@ -34,7 +34,7 @@ interface DataTableProps extends PaperProps {
 }
 const DataTable = (params: DataTableProps): JSX.Element => {
     const {dataTableProvider} = params;
-    const [page, setPage] = React.useState<number>(0);
+    const [page, setPage] = React.useState<number>(1);
     const [sortByCol, setSortByCol] = React.useState<number | undefined>(undefined);
     const [sortDirection, setSortDirection] = React.useState<"desc" | "asc" | undefined>(undefined);
     const [sortType, setSortType] = React.useState<"number" | "string">("string");
@@ -69,7 +69,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
 
     // Sort rows
     if ((sortByCol !== undefined) && (sortDirection !== undefined) && (dataTableProvider.getSortValue !== undefined)) {
-        const getSortValue = dataTableProvider.getSortValue;
+        const getSortValue = dataTableProvider.getSortValue.bind(dataTableProvider);
         const sortMult: number = (sortDirection === "asc") ? 1 : -1;
         const comparitor: (...x: any) => number = (sortType === "number") ? numberComparitor : stringComparitor;
         rowData.sort((a, b) => { 
@@ -121,7 +121,7 @@ const DataTable = (params: DataTableProps): JSX.Element => {
                     {renderedRows}
                 </TableBody>
             </Table>
-            <Pagination count={maxPage} page={page} onChange={changePage} size="small" showFirstButton showLastButton />
+            <Pagination count={maxPage} page={page} onChange={changePage} size="small" />
         </TableContainer>
     </Paper>
 };
