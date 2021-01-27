@@ -25,10 +25,11 @@ export default function DemonDisplayer(props: { demonCompendium: DemonCompendium
     let fusionResultsSection: JSX.Element | undefined = undefined;
     if (props.fusionResults) {
         let recipesAry: Models.FusedDemon[] | undefined = undefined;
-        for (const ingCount in props.fusionResults) {
-            for (const id in props.fusionResults[ingCount]) {
+        for (const ingCountStr in props.fusionResults.data) {
+            const ingCount: number = Number(ingCountStr);
+            for (const id in props.fusionResults.data[ingCount]) {
                 if (Number(id) === demonId) {
-                    recipesAry = props.fusionResults[ingCount][id];
+                    recipesAry = props.fusionResults.data[ingCount][id];
                     break;
                 }
             }

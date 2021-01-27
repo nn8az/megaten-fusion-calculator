@@ -33,10 +33,11 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
 
     getAllRowsData(): Models.FusedDemon[] {
         const resultsAsRowsArray: Models.FusedDemon[] = [];
-        for (const ingCount in this.fusionResults) {
+        for (const ingCountStr in this.fusionResults.data) {
+            const ingCount = Number(ingCountStr);
             if (Number(ingCount) === 1) { continue; }
-            for (const demonId in this.fusionResults[ingCount]) {
-                for (const fusedDemon of this.fusionResults[ingCount][demonId]) {
+            for (const demonId in this.fusionResults.data[ingCount]) {
+                for (const fusedDemon of this.fusionResults.data[ingCount][demonId]) {
                     resultsAsRowsArray.push(fusedDemon);
                     break;
                 }
@@ -70,7 +71,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
         }
         renderedRow.push(<React.Fragment key={keyId}>
             <TableCell className={styles.ingredientsColumn}>
-                {Object.keys(fusedDemon.getBaseIngredientsCounts()).length}
+                {this.fusionResults.getIngredientCount(fusedDemon.demon.id)}
             </TableCell>
         </React.Fragment>);
         keyId++;
@@ -92,7 +93,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
             case 2: { 
                 return rowData.demon.race; }
             case (this.columnCount - 2):
-                return Object.keys(rowData.getBaseIngredientsCounts()).length;
+                return this.fusionResults.getIngredientCount(rowData.demon.id) || 0;
             default: {
                 return rowData.demon.stats[sortByCol-3]; }
         };
@@ -104,6 +105,7 @@ class FusionResultsDataTableProvider implements DataTables.DataTableProvider<Mod
 
     fusionResults: Models.FusionResults;
     recipesButtonHandler: (...x: any) => void;
+    
     columnCount: number = 0;
 
     constructor(params: FusionResultsTableProps, onRecipesButtonClick: (demonId: number) => void) {

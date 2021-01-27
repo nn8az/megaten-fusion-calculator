@@ -4,7 +4,8 @@ import reportWebVitals from './reportWebVitals';
 import {
   Switch,
   Route,
-  Router
+  Router,
+  Redirect
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 
@@ -19,8 +20,11 @@ ReactDOM.render(
   <React.StrictMode>
     <Router history={history}>
       <Switch>
-        <Route path={["/megaten-fusion-recommender/:gameStrCode?","/"]}>
+        <Route path="/megaten-fusion-recommender/:gameStrCode?">
           <App/>
+        </Route>
+        <Route path="/">
+          <Redirect to="/megaten-fusion-recommender/" />
         </Route>
       </Switch>
     </Router>

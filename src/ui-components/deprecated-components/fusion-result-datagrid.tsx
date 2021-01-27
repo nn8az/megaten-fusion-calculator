@@ -63,10 +63,10 @@ const FusionResultDataGrid = (params: {
           { field: "recipe", headerName: "Recipe", flex: 1, renderCell: renderRecipeWrapper, valueGetter: getRecipeAsString});
 
       const ingredientsAsRowsArray = [];
-      for (const size in fusionResults) {
+      for (const size in fusionResults.data) {
           if (Number(size) === 1) { continue; }
-          for (const demonId in fusionResults[size]) {
-              for (const fusedDemon of fusionResults[size][demonId]) {
+          for (const demonId in fusionResults.data[size]) {
+              for (const fusedDemon of fusionResults.data[size][demonId]) {
                   const {demon} = fusedDemon;
                   const demonRow: any = {
                       "id": 0,

@@ -11,6 +11,8 @@ import IngredientsTable from './ui-components/ingredients-table';
 import ResultsTable from './ui-components/results-table';
 import SettingsPanel, { UserSettings, SettingsPanelEventHandlers } from './ui-components/settings-panel';
 import DemonAdder from './ui-components/demon-adder';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import ReplayIcon from '@material-ui/icons/Replay';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
@@ -21,44 +23,54 @@ import DemonDisplayer from './demon-displayer';
 
 const MAX_FUSION_INGREDIENT_HARD_CAP = 5;
 
+async function calculateAllFusionCombinationsAsync(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: UserSettings, ingredientsSettings: Models.IngredientsSettings): Promise<Models.FusionResults> {
+  const promise = new Promise<Models.FusionResults>(function(resolver) {
+    setTimeout(function () {
+      resolver(calculateAllFusionCombinations(ingredients, demonCompendium, settings, ingredientsSettings));
+    }, 100);
+  });
+  return promise;
+}
+
 function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: UserSettings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
-  const myFusionResults: Models.FusionResults = {};
+  const newFusionResults = new Models.FusionResults();
+  const newFusionResultsData = newFusionResults.data;
   for (let size = 1; size <= settings.maxIngredient && size <= MAX_FUSION_INGREDIENT_HARD_CAP; size++) {
-    myFusionResults[size] = {};
+    newFusionResultsData[size] = {};
   }
 
   for (const demonId in ingredients) {
     const demon: Models.Demon | undefined = demonCompendium.getDemonById(Number(demonId));
     if (!demon) { continue; }
     const fusedDemon: Models.FusedDemon = new Models.FusedDemon(demon);
-    if (!myFusionResults[1][demon.id]) {
-      myFusionResults[1][demon.id] = [];
+    if (!newFusionResultsData[1][demon.id]) {
+      newFusionResultsData[1][demon.id] = [];
     }
-    myFusionResults[1][demon.id].push(fusedDemon);
+    newFusionResultsData[1][demon.id].push(fusedDemon);
   }
 
   for (let ingCountR = 2; ingCountR <= settings.maxIngredient && ingCountR <= MAX_FUSION_INGREDIENT_HARD_CAP; ingCountR++) {
     for (let ingCountA = ingCountR - 1; ingCountA >= (ingCountR / 2); ingCountA--) {
       const ingCountB: number = ingCountR - ingCountA;
       const speciesUsedAsA: { [id: number]: boolean } = {}; // id of the demon species that have already been used in the calculation as demon A
-      for (const idA in myFusionResults[ingCountA]) {
-        if (myFusionResults[ingCountA][idA].length === 0) { continue; }
-        const speciesA: Models.Demon = myFusionResults[ingCountA][idA][0].demon;
-        for (const idB in myFusionResults[ingCountB]) {
-          if (myFusionResults[ingCountB][idB].length === 0) { continue; }
-          const speciesB: Models.Demon = myFusionResults[ingCountB][idB][0].demon;
+      for (const idA in newFusionResultsData[ingCountA]) {
+        if (newFusionResultsData[ingCountA][idA].length === 0) { continue; }
+        const speciesA: Models.Demon = newFusionResultsData[ingCountA][idA][0].demon;
+        for (const idB in newFusionResultsData[ingCountB]) {
+          if (newFusionResultsData[ingCountB][idB].length === 0) { continue; }
+          const speciesB: Models.Demon = newFusionResultsData[ingCountB][idB][0].demon;
 
           // skip calculating fusions that should have already been calculated since A+B produces the same results as B+A
           if (speciesUsedAsA[speciesB.id]) { continue; }
 
           const speciesR: Models.Demon | undefined = demonCompendium.fuseDemons(speciesA, speciesB);
           if (!speciesR) { continue; }
-          if (!filterDemonsAfterSpeciesFusion(myFusionResults, settings, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
+          if (!filterDemonsAfterSpeciesFusion(newFusionResults, settings, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
 
-          const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, myFusionResults[ingCountA][idA], myFusionResults[ingCountB][idB]);
-          if (!myFusionResults[ingCountR][speciesR.id]) { myFusionResults[ingCountR][speciesR.id] = []; }
+          const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, newFusionResultsData[ingCountA][idA], newFusionResultsData[ingCountB][idB]);
+          if (!newFusionResultsData[ingCountR][speciesR.id]) { newFusionResultsData[ingCountR][speciesR.id] = []; }
           for (const fusedDemon of resultingFusedDemons) {
-            myFusionResults[ingCountR][speciesR.id].push(fusedDemon);
+            newFusionResultsData[ingCountR][speciesR.id].push(fusedDemon);
           }
         }
         speciesUsedAsA[speciesA.id] = true;
@@ -66,7 +78,7 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
     }
 
     if (settings.useTripleFusion) {
-      calculateTripleFusionCombinations(ingredients, demonCompendium, settings, ingredientsSettings, myFusionResults, ingCountR);
+      calculateTripleFusionCombinations(ingredients, demonCompendium, settings, ingredientsSettings, newFusionResults, ingCountR);
     }
   }
 
@@ -74,46 +86,48 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
   // Re-traverse the entire results and purge fusions that don't satisfy various constraints/settings
   const mustUseDemons: Models.MustUseDemonsMap = prepareIngredientsSettingsForFinalFilter(ingredientsSettings, ingredients);
   let filterFunction = filterDemonsAfterCalculation.bind(undefined, mustUseDemons);
-  for (const ingCount in myFusionResults) {
+  for (const ingCount in newFusionResultsData) {
     if (Number(ingCount) === 1) { continue; }
-    for (const id in myFusionResults[ingCount]) {
-      let demonAry: Models.FusedDemon[] = myFusionResults[ingCount][id];
+    for (const id in newFusionResultsData[ingCount]) {
+      let demonAry: Models.FusedDemon[] = newFusionResultsData[ingCount][id];
       demonAry = demonAry.filter((demon) => { return !demon.isWeakerThanIngredients() });
       demonAry = demonAry.filter(filterFunction);
-      myFusionResults[ingCount][id] = demonAry;
+      newFusionResultsData[ingCount][id] = demonAry;
     }
   }
 
-  return myFusionResults;
+  newFusionResults.updateMetaData();
+  return newFusionResults;
 }
 
 function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: UserSettings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number): void {
   let ingCounts: number[] = [];
+  const fusionResultsData = fusionResults.data;
   while (getNextTripleFusionIngCounts(ingCounts, ingCountR)) {
     const [ingCountA, ingCountB, ingCountC] = ingCounts;
     const alreadyCalculatedAsA: { [id: number]: boolean } = {};
-    for (const idA in fusionResults[ingCountA]) {
-      if (fusionResults[ingCountA][idA].length === 0) { continue; }
-      const speciesA: Models.Demon = fusionResults[ingCountA][idA][0].demon;
+    for (const idA in fusionResultsData[ingCountA]) {
+      if (fusionResultsData[ingCountA][idA].length === 0) { continue; }
+      const speciesA: Models.Demon = fusionResultsData[ingCountA][idA][0].demon;
 
       const alreadyCalculatedAsB: { [id: number]: boolean } = {};
-      for (const idB in fusionResults[ingCountB]) {
+      for (const idB in fusionResultsData[ingCountB]) {
         if (alreadyCalculatedAsA[Number(idB)]) { continue; }
-        if (fusionResults[ingCountB][idB].length === 0) { continue; }
-        const speciesB: Models.Demon = fusionResults[ingCountB][idB][0].demon;
+        if (fusionResultsData[ingCountB][idB].length === 0) { continue; }
+        const speciesB: Models.Demon = fusionResultsData[ingCountB][idB][0].demon;
 
-        for (const idC in fusionResults[ingCountC]) {
+        for (const idC in fusionResultsData[ingCountC]) {
           if (alreadyCalculatedAsA[Number(idC)]) { continue; }
           if (alreadyCalculatedAsB[Number(idC)]) { continue; }
-          if (fusionResults[ingCountC][idC].length === 0) { continue; }
-          const speciesC: Models.Demon = fusionResults[ingCountC][idC][0].demon;
+          if (fusionResultsData[ingCountC][idC].length === 0) { continue; }
+          const speciesC: Models.Demon = fusionResultsData[ingCountC][idC][0].demon;
           const speciesR: Models.Demon | undefined = demonCompendium.tripleFuseDemons(speciesA, speciesB, speciesC);
           if (!speciesR) { continue; }
           if (!filterDemonsAfterSpeciesFusion(fusionResults, settings, speciesR, ingCountR, [speciesA, speciesB, speciesC])) { continue; }
-          const resultFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResults[ingCountA][idA], fusionResults[ingCountB][idB], fusionResults[ingCountC][idC]);
-          if (!fusionResults[ingCountR][speciesR.id]) { fusionResults[ingCountR][speciesR.id] = []; }
+          const resultFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResultsData[ingCountA][idA], fusionResultsData[ingCountB][idB], fusionResultsData[ingCountC][idC]);
+          if (!fusionResultsData[ingCountR][speciesR.id]) { fusionResultsData[ingCountR][speciesR.id] = []; }
           for (const fusedDemon of resultFusedDemons) {
-            fusionResults[ingCountR][speciesR.id].push(fusedDemon);
+            fusionResultsData[ingCountR][speciesR.id].push(fusedDemon);
           }
         }
         alreadyCalculatedAsB[speciesB.id] = true;
@@ -143,10 +157,11 @@ function getNextTripleFusionIngCounts(fusionIngCounts: number[], ingCountR: numb
 }
 
 function filterDemonsAfterSpeciesFusion(fusionResults: Models.FusionResults, settings: UserSettings, speciesR: Models.Demon, ingCountR: number, speciesIngs: Models.Demon[]): boolean {
+  const fusionResultsData = fusionResults.data;
   // throw out the resulting species if we knew how to make it with fewer ingredients
   let canBeMadeWithLessIngredient: boolean = false;
   for (let sizeCheck = ingCountR - 1; sizeCheck >= 1; sizeCheck--) {
-    if (fusionResults[sizeCheck][speciesR.id]) {
+    if (fusionResultsData[sizeCheck][speciesR.id]) {
       canBeMadeWithLessIngredient = true;
       break;
     }
@@ -218,15 +233,6 @@ function crissCrossFusedDemons(resultSpecies: Models.Demon, ingredientsSettings:
   return ret.filter(filterDemonsAfterCrissCross.bind(undefined, ingredientsSettings));;
 }
 
-function hasFusionResult(fusionResults: Models.FusionResults): boolean {
-  let hasFusionResult = false;
-  for (const ingCount in fusionResults) {
-    if (Number(ingCount) === 1) { continue; }
-    if (Object.keys(fusionResults[ingCount]).length > 0) { hasFusionResult = true; break; }
-  }
-  return hasFusionResult;
-}
-
 //====================================================================================================
 
 function initializeUserSettings(demonCompendium: DemonCompendium): UserSettings {
@@ -240,7 +246,8 @@ export default function FusionCalculator(props: { demonCompendium: DemonCompendi
   const { demonCompendium } = props;
 
   const [ingredients, setIngredients] = useState<Models.Ingredients>({});
-  let [fusionResults, setFusionResults] = useState<Models.FusionResults>({});
+  let [fusionResults, setFusionResults] = useState<Models.FusionResults>(new Models.FusionResults());
+  const [fusionResultsPromise, setFusionResultsPromise] = useState<Promise<Models.FusionResults> | undefined>(undefined);
   let [resetterKey, setResetterKey] = useState<number>(1); // This key is meant to be used to reset components. Changes to this key will trigger components to reset.
   const history = useHistory();
   const routeMatcher = useRouteMatch();
@@ -252,10 +259,22 @@ export default function FusionCalculator(props: { demonCompendium: DemonCompendi
   const refResultsTable = useRef<HTMLHeadingElement>(null);
 
   useEffect(()=>{
-    if (hasFusionResult(fusionResults)) {
-      refResultsTable.current?.scrollIntoView({ behavior: "smooth" });
+    let isMounted: boolean = true;
+
+    if (fusionResultsPromise) {
+      fusionResultsPromise.then((fr)=>{
+        if (isMounted) {
+          setFusionResults(fr);
+          setFusionResultsPromise(undefined);
+          if (fr.hasFusionResult()) {
+            refResultsTable.current?.scrollIntoView({ behavior: "smooth" });
+          }
+        }
+      });
     }
-  }, [fusionResults]);
+
+    return ()=>{ isMounted = false; }
+  }, [fusionResults, fusionResultsPromise]);
 
   const removeDemonFromIngredientsHandler = useCallback(function (demonId: number): void {
     const newIngredients = { ...ingredients };
@@ -272,7 +291,7 @@ export default function FusionCalculator(props: { demonCompendium: DemonCompendi
   };
 
   function calculateButtonHandler(): void {
-    setFusionResults(calculateAllFusionCombinations(ingredients, demonCompendium, settings, ingredientsSettings));
+    setFusionResultsPromise(calculateAllFusionCombinationsAsync(ingredients, demonCompendium, settings, ingredientsSettings));
   }
 
   function settingsButtonHandler(): void {
@@ -287,9 +306,8 @@ export default function FusionCalculator(props: { demonCompendium: DemonCompendi
     for (const key in ingredientsSettings) {
       delete ingredientsSettings[key];
     }
-
-    const newFusionResults = {};
-    setFusionResults(newFusionResults);
+    
+    setFusionResults(new Models.FusionResults());
 
     setResetterKey((resetterKey + 1) % 2);
   }
@@ -306,7 +324,7 @@ export default function FusionCalculator(props: { demonCompendium: DemonCompendi
         </Route>
         <Route path={`${routeMatcher.path}/`}>
 
-          <div className={styles.fusionCalculator}>
+          <div className={styles.fusionCalculator + (fusionResultsPromise ? " " + styles.loading : "")}>
             <div className={styles.section}>
               <h2>Add Demons to Use as Fusion Ingredients</h2>
               <div className={styles.addDemonsAndButtonsRowContainer}>
@@ -327,12 +345,16 @@ export default function FusionCalculator(props: { demonCompendium: DemonCompendi
                 ingredientsSettings={ingredientsSettings}
                 onRemoveIngredient={removeDemonFromIngredientsHandler} />
             </div>
-            <div className={styles.section} hidden={!hasFusionResult(fusionResults)}>
+            <div className={styles.section} hidden={!fusionResults.hasFusionResult()}>
               <h2>Results</h2>
               <div ref={refResultsTable}>
                 <ResultsTable fusionResults={fusionResults} onOpenDemonRecipes={openDemonRecipesHandler} />
               </div>
             </div>
+            
+            <Backdrop open={fusionResultsPromise !== undefined} hidden={fusionResultsPromise === undefined}>
+              <CircularProgress color="inherit" />
+            </Backdrop>
           </div>
 
         </Route>

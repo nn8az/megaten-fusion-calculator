@@ -98,7 +98,45 @@ export class DemonsPreset {
     }
 }
 
+export class FusionResults {
+    data: { [ingredientCount: number]: { [demonId: number]: FusedDemon[] } };
+    metadata: {
+        ingredientCountMap: { [demonId: number]: number }
+    };
+
+    constructor() {
+        this.data = {};
+        this.metadata = { ingredientCountMap: {} };
+    }
+
+    public updateMetaData(): void {
+        this.populateFusionResultsIngCountMap();
+    }
+
+    public getIngredientCount(demonId: number): number | undefined {
+        return this.metadata.ingredientCountMap[demonId];
+    }
+
+    public hasFusionResult(): boolean {
+        let hasFusionResult = false;
+        for (const ingCount in this.data) {
+            if (Number(ingCount) === 1) { continue; }
+            if (Object.keys(this.data[ingCount]).length > 0) { 
+                hasFusionResult = true;
+                break; }
+        }
+        return hasFusionResult;
+    }
+
+    private populateFusionResultsIngCountMap(): void {
+        for (const ingCount in this.data) {
+            for (const id in this.data[ingCount]) {
+                this.metadata.ingredientCountMap[Number(id)] = Number(ingCount);
+            }
+        }
+    }
+}
+
 export type Ingredients = { [demonId: number]: boolean };
 export type IngredientsSettings = { [demonId: number]: { mustUse: boolean, multipleUse: boolean } };
 export type MustUseDemonsMap = {[demonId: number]: boolean};
-export type FusionResults = { [ingredientCount: number]: { [id: string]: FusedDemon[] } };

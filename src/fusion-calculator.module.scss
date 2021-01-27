@@ -1,5 +1,9 @@
 .fusionCalculator {
 
+    &.loading {
+        pointer-events: none;
+    }
+
     .addDemonsAndButtonsRowContainer {
         display: inline-flex;
         flex-direction: column;
