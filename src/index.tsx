@@ -51,7 +51,6 @@ function GitHubPageRedirect(): JSX.Element {
       window.history.replaceState(null, "",
           loc.pathname.slice(0, -1) + decoded + loc.hash
       );
-      console.log(loc.pathname.slice(0, -1) + decoded + loc.hash);
     }
   }(window.location))
   return <React.Fragment />

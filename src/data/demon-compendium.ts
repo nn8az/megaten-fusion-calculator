@@ -3,8 +3,8 @@ import * as Models from './data-models';
 type DemonInfo = { lvl: number, race: string, stats: number[] };
 type DemonJson = { demons: {[demonName: string]: DemonInfo}, statsName: string[] };
 type FusionSettingsJson = {
-    sameRaceFusionMechanic?: string,
-    tripleFusionMechanic?: string,
+    sameRaceFuseToElement?: boolean,
+    enableTripleFusion?: boolean,
     disableSameDemonFusion?: boolean,
 }
 type FusionChartJson = {
@@ -18,17 +18,18 @@ type FusionChartJson = {
 type Preset = { caption: string, demons: string[] };
 type PresetsJson = { presets: Preset[] };
 
+const FUSION_CHART_NULLS: { [nullStr: string]: boolean } = { "None": true };
+
 export class DemonCompendium {
     private demonsAry: Models.Demon[] = [];
-    private normalFusionChart: { [race: string]: { [race: string]: string } } = {}; // Maps 2 races to the race that results from their fusion. Example usage: x["Fairy"]["Genma"] gives you race that results from fusing a Fairy demon with a Genma demon. Special case: when both of the 2 races are the same, the result is a demon's name instead of a race.
-    private tripleFusionChart: { [race: string]: { [race: string]: string } } = {};
+    private normalFusionChart: { [race: string]: { [race: string]: string | undefined } } = {}; // Maps 2 races to the race that results from their fusion. Example usage: x["Fairy"]["Genma"] gives you race that results from fusing a Fairy demon with a Genma demon. Special case: when both of the 2 races are the same, the result is a demon's name instead of a race.
+    private tripleFusionChart: { [race: string]: { [race: string]: string | undefined } } = {};
     private elementsMap: { [demonId: number]: Models.Demon } = {};
-    private elementFusionChart: { [race: string]: { [elementId: string]: number } } = {};
+    private elementFusionChart: { [race: string]: { [elementId: string]: number | undefined } } = {};
     private demonsPresets: Models.DemonsPreset[] = [];
 
-    private gameHasElements: boolean = false;
-    private _usePersonaSameRaceFusionMechanic: boolean = false;
-    private _usePersonaTripleFusionMechanic: boolean = false;
+    private _sameRaceFuseToElement: boolean = false;
+    private _enableTripleFusion: boolean = false;
     private disableSameDemonFusion: boolean = false;
 
     private idMap: { [demonId: number]: Models.Demon } = {}; // Maps id to a demon model object
@@ -68,20 +69,20 @@ export class DemonCompendium {
         return this.demonsPresets;
     }
 
-    public get usePersonaTripleFusionMechanic(): boolean {
-        return this._usePersonaTripleFusionMechanic;
+    public get enableTripleFusion(): boolean {
+        return this._enableTripleFusion;
     }
 
-    public get usePersonaSameRaceFusionMechanic(): boolean {
-        return this._usePersonaSameRaceFusionMechanic;
+    public get sameRaceFuseToElement(): boolean {
+        return this._sameRaceFuseToElement;
     }
 
     public fuseDemons(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
         if (demonA.id === demonB.id && this.disableSameDemonFusion) { return undefined; }
         
-        if (this.isElement(demonA) && this.isElement(demonB)) {
+        if (this.demonIsElement(demonA) && this.demonIsElement(demonB)) {
             return undefined;
-        } else if (this.isElement(demonA) || this.isElement(demonB)) {
+        } else if (this.demonIsElement(demonA) || this.demonIsElement(demonB)) {
             return this.fuseDemonWithElement(demonA, demonB);
         } else if (demonA.race === demonB.race) {
             return this.fuseDemonSameRaceNoElement(demonA, demonB);
@@ -102,7 +103,7 @@ export class DemonCompendium {
         if (!intermediateRace) { return undefined; }
         const resultRace: string | undefined = this.getTripleFusionRace(intermediateRace, demonStrong.race);
         if (!resultRace) { return undefined; }
-        const resultLvlTable: number[] = this.getLvlTableForRace(resultRace, true);
+        const resultLvlTable: number[] = this.getLvlTableForRace(resultRace);
         const resultLvlTest: number = (demonWeak.lvl + demonMid.lvl + demonStrong.lvl + 12.75) / 3;
         let resultLvl: number = this.findResultLvlFromLvlTable(resultLvlTable, resultLvlTest, true);
         let demonResult: Models.Demon | undefined = this.getDemonFromRaceLvl(resultRace, resultLvl);
@@ -193,8 +194,8 @@ export class DemonCompendium {
     }
 
     private parseSettings(fusionSettingsJson: FusionSettingsJson): void {
-        this._usePersonaSameRaceFusionMechanic = fusionSettingsJson.sameRaceFusionMechanic === "persona";
-        this._usePersonaTripleFusionMechanic = fusionSettingsJson.tripleFusionMechanic === "persona";
+        this._sameRaceFuseToElement = Boolean(fusionSettingsJson.sameRaceFuseToElement);
+        this._enableTripleFusion = Boolean(fusionSettingsJson.enableTripleFusion);
         this.disableSameDemonFusion = Boolean(fusionSettingsJson.disableSameDemonFusion);
     }
 
@@ -202,7 +203,7 @@ export class DemonCompendium {
         for (let row: number = 0; row < fusionChartJson.raceFusionTable.length; row++) {
             for (let col: number = 0; col < fusionChartJson.raceFusionTable[row].length; col++) {
                 const chartsToUpdate = [];
-                if (this._usePersonaTripleFusionMechanic) {
+                if (this._enableTripleFusion) {
                     if (col < row) {
                         chartsToUpdate.push(this.tripleFusionChart);
                     } else if (col === row) {
@@ -220,7 +221,11 @@ export class DemonCompendium {
 
                 const raceA: string = fusionChartJson.races[row];
                 const raceB: string = fusionChartJson.races[col];
-                const raceC: string = fusionChartJson.raceFusionTable[row][col];
+                let raceC: string | undefined = fusionChartJson.raceFusionTable[row][col];
+                if (FUSION_CHART_NULLS[raceC])
+                {
+                    raceC = undefined;
+                }
 
                 // Set the .raceA.raceB property of the parsed fusion table
                 for (const chart of chartsToUpdate) {
@@ -247,12 +252,13 @@ export class DemonCompendium {
             }
         }
 
+        // Parse race data
         for (let i = 0; i < fusionChartJson.races.length; i++) {
             this.raceIdMap[fusionChartJson.races[i]] = i;
         }
 
+        // Parse elements data
         if (fusionChartJson.elements && fusionChartJson.elements.length > 0) {
-            this.gameHasElements = true;
             const elementIdIndexMap: { [elementId: number]: number } = {};
             for (let i = 0; i < fusionChartJson.elements.length; i++) {
                 const elementName = fusionChartJson.elements[i];
@@ -311,17 +317,17 @@ export class DemonCompendium {
         }
         for (const demon of this.demonsAry) {
             if (demon.specialRecipe) { continue; }
-            demon.rank = this.getLvlTableForRace(demon.race, true).indexOf(demon.lvl);
+            demon.rank = this.getLvlTableForRace(demon.race).indexOf(demon.lvl);
         }
     }
 
-    private getLvlTableForRace(race: string, excludeDemonsWithSpecialRecipe?: boolean): number[] {
+    private getLvlTableForRace(race: string, includeUnfusable?: boolean): number[] {
         if (!this.raceLvlDemonMap[race]) {
             return [];
         }
         const lvlTable: number[] = [];
         for (const lvl in this.raceLvlDemonMap[race]) {
-            if (excludeDemonsWithSpecialRecipe && this.raceLvlDemonMap[race][lvl].specialRecipe) {
+            if (!includeUnfusable && this.demonIsUnfusable(this.raceLvlDemonMap[race][lvl])) {
                 continue;
             }
             lvlTable.push(Number(lvl));
@@ -377,7 +383,7 @@ export class DemonCompendium {
     private fuseDemonDiffRaceNoElement(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
         const raceR: string | undefined = this.getFusionRace(demonA.race, demonB.race);
         if (!raceR) { return undefined; }
-        const lvlTableR: number[] = this.getLvlTableForRace(raceR, true);
+        const lvlTableR: number[] = this.getLvlTableForRace(raceR);
         if (lvlTableR.length === 0) { return undefined; }
         const lvlResultTest = (demonB.lvl + demonA.lvl + 1) / 2;
         const lvlR: number = this.findResultLvlFromLvlTable(lvlTableR, lvlResultTest);
@@ -385,12 +391,12 @@ export class DemonCompendium {
     }
 
     private fuseDemonSameRaceNoElement(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
-        if (this.gameHasElements) {
+        if (this._sameRaceFuseToElement) {
             const elementNameR: string | undefined = this.getFusionRace(demonA.race, demonB.race);
             if (!elementNameR) { return undefined; }
             return this.getDemonByName(elementNameR);
-        } else if (this._usePersonaSameRaceFusionMechanic) {
-            const resultLvlTable = this.getLvlTableForRace(demonB.race, true).filter(lvl => lvl !== demonA.lvl);
+        } else {
+            const resultLvlTable = this.getLvlTableForRace(demonB.race).filter(lvl => lvl !== demonA.lvl);
             let resultLvlIndex = -1;
             for (const resultLvl of resultLvlTable) {
                 if (demonA.lvl + demonB.lvl >= 2 * resultLvl) { resultLvlIndex = resultLvlIndex + 1 }
@@ -408,10 +414,10 @@ export class DemonCompendium {
 
     private fuseDemonWithElement(demonA: Models.Demon, demonB: Models.Demon): Models.Demon | undefined {
         let element, demon;
-        if (this.isElement(demonA)) {
+        if (this.demonIsElement(demonA)) {
             element = demonA;
             demon = demonB;
-        } else if (this.isElement(demonB)) {
+        } else if (this.demonIsElement(demonB)) {
             element = demonB;
             demon = demonA;
         } else {
@@ -426,7 +432,11 @@ export class DemonCompendium {
         return this.getDemonFromRaceLvl(demon.race, lvlTable[resultRank]);
     }
 
-    private isElement(demon: Models.Demon): boolean {
+    private demonIsElement(demon: Models.Demon): boolean {
         return this.elementsMap[demon.id] !== undefined;
+    }
+
+    private demonIsUnfusable(demon: Models.Demon): boolean {
+        return demon.rank === 1000;
     }
 }

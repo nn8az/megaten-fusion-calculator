@@ -22,9 +22,10 @@ const theme = createMuiTheme({
 function loadDesu2DemonCompendium(callback: (demonCompendium: DemonCompendium) => void): void {
   const demonJsonPromise = import("./data/desu2/demons.json").then(importedJson => importedJson.default);
   const fusionChartJsonPromise = import("./data/desu2/fusion-chart.json").then(importedJson => importedJson.default);
+  const settingsJsonPromise = import("./data/desu2/fusion-settings.json").then(importedJson => importedJson.default);
   const presetJsonPromise = import("./data/desu2/presets.json").then(importedJson => importedJson.default);
-  Promise.all([demonJsonPromise, fusionChartJsonPromise, presetJsonPromise]).then(loadedJsons => {
-    const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], undefined, loadedJsons[2]);
+  Promise.all([demonJsonPromise, fusionChartJsonPromise, settingsJsonPromise, presetJsonPromise]).then(loadedJsons => {
+    const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], loadedJsons[2], loadedJsons[3]);
     callback(newDemonCompendium);
   })
 }
@@ -39,15 +40,29 @@ function loadPersona4GoldenDemonCompendium(setLoadedCompendiumCallback: (demonCo
   })
 }
 
+function loadPersona5RoyalDemonCompendium(setLoadedCompendiumCallback: (demonCompendium: DemonCompendium) => void): void {
+  const demonJsonPromise = import("./data/p5r/demons.json").then(importedJson => importedJson.default);
+  const fusionChartJsonPromise = import("./data/p5r/fusion-chart.json").then(importedJson => importedJson.default);
+  const settingsJsonPromise = import("./data/p5r/fusion-settings.json").then(importedJson => importedJson.default);
+  Promise.all([demonJsonPromise, fusionChartJsonPromise, settingsJsonPromise]).then(loadedJsons => {
+    const newDemonCompendium = new DemonCompendium(loadedJsons[0], loadedJsons[1], loadedJsons[2]);
+    setLoadedCompendiumCallback(newDemonCompendium);
+  })
+}
+
 export enum Game {
   person4Golden = 0,
-  devilSurvivor2 = 1
+  persona5Royal = 1,
+  devilSurvivor2 = 2
 }
 
 function loadGameData(game: Game, setLoadedCompendiumCallback: (demonCompendium: DemonCompendium) => void): void {
   switch(game) {
     case Game.person4Golden:
       loadPersona4GoldenDemonCompendium(setLoadedCompendiumCallback);
+      break;
+    case Game.persona5Royal:
+      loadPersona5RoyalDemonCompendium(setLoadedCompendiumCallback);
       break;
     case Game.devilSurvivor2:
       loadDesu2DemonCompendium(setLoadedCompendiumCallback);
@@ -60,6 +75,7 @@ function loadGameData(game: Game, setLoadedCompendiumCallback: (demonCompendium:
 
 const urlParamToGameMap: { [gameStr: string]: Game } = {
   p4g: Game.person4Golden,
+  p5r: Game.persona5Royal,
   desu2: Game.devilSurvivor2
 }
 
@@ -112,6 +128,7 @@ export default function App(): JSX.Element {
         </header>
         <Tabs value={currentGame} onChange={changeGameTabHandler}>
           <Tab label="Persona 4 Golden" />
+          <Tab label="Persona 5 Royal" />
           <Tab label="Devil Survivor 2" />
         </Tabs>
 

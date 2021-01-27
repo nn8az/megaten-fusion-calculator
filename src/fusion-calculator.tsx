@@ -237,8 +237,8 @@ function crissCrossFusedDemons(resultSpecies: Models.Demon, ingredientsSettings:
 
 function initializeUserSettings(demonCompendium: DemonCompendium): UserSettings {
   const settings = new UserSettings();
-  settings.useTripleFusion = demonCompendium.usePersonaTripleFusionMechanic;
-  settings.useTripleFusionSettingIsVisible = demonCompendium.usePersonaTripleFusionMechanic;
+  settings.useTripleFusion = demonCompendium.enableTripleFusion;
+  settings.useTripleFusionSettingIsVisible = demonCompendium.enableTripleFusion;
   return settings;
 }
 

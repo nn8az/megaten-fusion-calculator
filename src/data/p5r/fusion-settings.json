@@ -1,5 +1,5 @@
 {
     "sameRaceFuseToElement": false,
-    "enableTripleFusion": true,
+    "enableTripleFusion": false,
     "disableSameDemonFusion": true
 }
