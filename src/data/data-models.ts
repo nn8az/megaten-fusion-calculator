@@ -3,9 +3,10 @@ export class Demon {
     name: string;
     lvl: number;
     race: string;
-    rank: number = 0;
     specialRecipe: boolean = false;
     stats: number[] = [];
+    rank?: number;
+
     static statsName: string[] = [];
 
     constructor(id: number, name: string, lvl: number, race: string, stats: number[]) {
@@ -20,10 +21,25 @@ export class Demon {
 export class FusedDemon {
     demon: Demon;
     ingredients?: FusedDemon[];
+    private baseIngredientsMetadata: { [baseIngId: number]: { count: number, demon: Demon} } = {};
 
     constructor(demon: Demon, ingredients?: FusedDemon[]) {
         this.demon = demon;
         this.ingredients = ingredients;
+
+        if (!ingredients) {
+            this.baseIngredientsMetadata[demon.id] = { count: 1, demon: demon};
+        } else {
+            for (const fusedDemon of ingredients) {
+                const baseIngsMetadata = fusedDemon.getBaseIngredientsInfo()
+                for (const baseIngId in baseIngsMetadata) {
+                    this.baseIngredientsMetadata[baseIngId] = this.baseIngredientsMetadata[baseIngId] || {};
+                    this.baseIngredientsMetadata[baseIngId].count =  (this.baseIngredientsMetadata[baseIngId].count || 0 ) + 
+                        baseIngsMetadata[baseIngId].count;
+                    this.baseIngredientsMetadata[baseIngId].demon = baseIngsMetadata[baseIngId].demon;
+                };
+            }
+        }
     }
 
     public isFused(): boolean {
@@ -31,43 +47,28 @@ export class FusedDemon {
         return this.ingredients.length > 0;
     }
 
-    public getBaseIngredients(): { [id: number]: Demon } {
-        if (this.ingredients) {
-            let ret: { [id: number]: Demon } = {};
-            for (const ingDemon of this.ingredients) {
-                ret = {...ret, ...ingDemon.getBaseIngredients()};
-            }
-            return ret;
-        } else {
-            const ret: { [id: number]: Demon } = {};
-            ret[this.demon.id] = this.demon;
-            return ret;
+    public getBaseIngredientsInfo(): { [id: number]: { count: number, demon: Demon } } {
+        return this.baseIngredientsMetadata;
+    }
+
+    public getBaseIngredientsDemons(): { [id: number]: Demon } {
+        let ret: { [id: number]: Demon } = {};
+        for (const ingId in this.baseIngredientsMetadata) {
+            ret[ingId] = this.baseIngredientsMetadata[ingId].demon;
         }
+        return ret;
     }
 
     public getBaseIngredientsCounts(): { [id: number]: number } {
-        if (this.ingredients) {
-            let ret: { [id: number]: number } = {};
-            for (const parentDemon of this.ingredients) {
-                const parentIngCount = parentDemon.getBaseIngredientsCounts();
-                for (const baseDemonId in parentIngCount) {
-                    ret[baseDemonId] = (ret[baseDemonId] || 0) + parentIngCount[baseDemonId];
-                }
-            }
-            return ret;
-        } else {
-            const ret: { [id: number]: number } = {};
-            ret[this.demon.id] = 1;
-            return ret;
+        let ret: { [id: number]: number } = {};
+        for (const ingId in this.baseIngredientsMetadata) {
+            ret[ingId] = this.baseIngredientsMetadata[ingId].count;
         }
-    }
-
-    public toBaseIngredientsIdCode(): string {
-        return Object.keys(this.getBaseIngredients()).join("-");
+        return ret;
     }
 
     public toBaseIngredientSearchString(): string {
-        return Object.values(this.getBaseIngredients()).map(demon => demon.name).join(" ");
+        return Object.values(this.getBaseIngredientsDemons()).map(demon => demon.name).join(" ");
     }
 
     public isWeakerThanIngredients(): boolean {

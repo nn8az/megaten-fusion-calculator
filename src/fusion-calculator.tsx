@@ -210,7 +210,9 @@ function prepareIngredientsSettingsForFinalFilter(ingSettings: Models.Ingredient
 function crissCrossFusedDemons(resultSpecies: Models.Demon, ingredientsSettings: Models.IngredientsSettings, ...ingredients: Models.FusedDemon[][]): Models.FusedDemon[] {
   const indeces: number[] = [];
   const ret: Models.FusedDemon[] = [];
-  for (let i = 0; i < ingredients.length; i++) { indeces.push(0); }
+  for (let i = 0; i < ingredients.length; i++) {
+    indeces.push(0);
+  }
   while (true) {
     const fusedDemonIngredientsHistory: Models.FusedDemon[] = [];
     for (let i = 0; i < ingredients.length; i++) {

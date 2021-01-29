@@ -202,21 +202,21 @@ export class DemonCompendium {
     private parseFusionChart(fusionChartJson: FusionChartJson): void {
         for (let row: number = 0; row < fusionChartJson.raceFusionTable.length; row++) {
             for (let col: number = 0; col < fusionChartJson.raceFusionTable[row].length; col++) {
-                const chartsToUpdate = [];
+                const dataStructToWriteTo = [];
                 if (this._enableTripleFusion) {
                     if (col < row) {
-                        chartsToUpdate.push(this.tripleFusionChart);
+                        dataStructToWriteTo.push(this.tripleFusionChart);
                     } else if (col === row) {
-                        chartsToUpdate.push(this.tripleFusionChart);
-                        chartsToUpdate.push(this.normalFusionChart);
+                        dataStructToWriteTo.push(this.tripleFusionChart);
+                        dataStructToWriteTo.push(this.normalFusionChart);
                     } else {
-                        chartsToUpdate.push(this.normalFusionChart);
+                        dataStructToWriteTo.push(this.normalFusionChart);
                     }
                 } else {
                     if (col > row) { 
                         continue;
                     }
-                    chartsToUpdate.push(this.normalFusionChart);
+                    dataStructToWriteTo.push(this.normalFusionChart);
                 }
 
                 const raceA: string = fusionChartJson.races[row];
@@ -227,8 +227,8 @@ export class DemonCompendium {
                     raceC = undefined;
                 }
 
-                // Set the .raceA.raceB property of the parsed fusion table
-                for (const chart of chartsToUpdate) {
+                for (const chart of dataStructToWriteTo) {
+                    // Set the .raceA.raceB property of the parsed fusion table
                     if (!chart[raceA]) {
                         chart[raceA] = {};
                     }
@@ -248,7 +248,6 @@ export class DemonCompendium {
                 const demon = this.getDemonByName(demonName);
                 if (!demon) { continue; }
                 demon.specialRecipe = true;
-                demon.rank = 1000;
             }
         }
 
@@ -264,6 +263,7 @@ export class DemonCompendium {
                 const elementName = fusionChartJson.elements[i];
                 const demon = this.getDemonByName(elementName);
                 if (!demon) { continue; };
+                
                 this.elementsMap[demon.id] = demon;
                 elementIdIndexMap[demon.id] = i;
             }
@@ -424,8 +424,8 @@ export class DemonCompendium {
             return this.fuseDemonSameRaceNoElement(demonA, demonB);
         }
 
-        const demonRankChange = (this.elementFusionChart[demon.race] || {})[element.id];
-        if (demonRankChange === undefined) { return undefined; }
+        const demonRankChange = this.elementFusionChart[demon.race]?.[element.id];
+        if (demonRankChange === undefined || demon.rank === undefined) { return undefined; }
         const lvlTable: number[] = this.getLvlTableForRace(demon.race);
         const resultRank: number = demon.rank + demonRankChange;
         if (resultRank < 0 || resultRank >= lvlTable.length) { return undefined; }
@@ -437,6 +437,6 @@ export class DemonCompendium {
     }
 
     private demonIsUnfusable(demon: Models.Demon): boolean {
-        return demon.rank === 1000;
+        return demon.specialRecipe;
     }
 }

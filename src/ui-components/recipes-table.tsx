@@ -57,7 +57,7 @@ function createFilterOptions(recipesAry: Models.FusedDemon[], currFilter: Filter
     const filterOptions: FilterOption[] = [];
     let ingDemonsMap: { [demonId: number]: string} = {};
     for (const fusedDemon of recipesAry) {
-        const ingDemons = fusedDemon.getBaseIngredients();
+        const ingDemons = fusedDemon.getBaseIngredientsDemons();
         for (const ingDemon in ingDemons) {
             ingDemonsMap[Number(ingDemon)] = ingDemons[ingDemon].name;
         }
