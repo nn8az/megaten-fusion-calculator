@@ -33,14 +33,10 @@ async function calculateAllFusionCombinationsAsync(ingredients: Models.Ingredien
 }
 
 function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, userSettings: UserSettings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
-  const fusionResults = new Models.FusionResults();
   const specialRecipes: Models.SpecialRecipes = demonCompendium.getSpecialRecipes();
   const viableSpecialRecipes: Models.SpecialRecipes = {};
   const maxIngredient: number = (userSettings.maxIngredient < MAX_FUSION_INGREDIENT_HARD_CAP) ? userSettings.maxIngredient : MAX_FUSION_INGREDIENT_HARD_CAP;
-
-  for (let size = 1; size <= maxIngredient; size++) {
-    fusionResults.data[size] = {};
-  }
+  const fusionResults = new Models.FusionResults(maxIngredient);
 
   for (const demonId in ingredients) {
     const demon: Models.Demon | undefined = demonCompendium.getDemonById(Number(demonId));
@@ -51,7 +47,7 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
     }
     fusionResults.data[1][demon.id].push(fusedDemon);
   }
-  updateViableSpecialRecipes(fusionResults, 1, specialRecipes, viableSpecialRecipes, maxIngredient);
+  updateViableSpecialRecipes(fusionResults, 1, specialRecipes, viableSpecialRecipes);
 
   // Compute double fusions
   for (let ingCountR = 2; ingCountR <= maxIngredient; ingCountR++) {
@@ -73,10 +69,7 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
           if (!filterDemonsAfterSpeciesFusion(fusionResults, userSettings, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
 
           const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResults.data[ingCountA][idA], fusionResults.data[ingCountB][idB]);
-          if (!fusionResults.data[ingCountR][speciesR.id]) { fusionResults.data[ingCountR][speciesR.id] = []; }
-          for (const fusedDemon of resultingFusedDemons) {
-            fusionResults.data[ingCountR][speciesR.id].push(fusedDemon);
-          }
+          fusionResults.addFusedDemonsOfSameSpecies(resultingFusedDemons);
         }
         speciesUsedAsA[speciesA.id] = true;
       }
@@ -91,36 +84,24 @@ function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCo
     calculateSpecialRecipeFusion(demonCompendium, userSettings, ingredientsSettings, fusionResults, ingCountR, viableSpecialRecipes);
 
     // Update viable special recipes
-    updateViableSpecialRecipes(fusionResults, ingCountR, specialRecipes, viableSpecialRecipes, maxIngredient);
+    updateViableSpecialRecipes(fusionResults, ingCountR, specialRecipes, viableSpecialRecipes);
   }
 
   // At this point, we're completely finished with all fusion combinations
   // Re-traverse through all of the results and purge fusions that don't satisfy various constraints/settings
   const mustUseDemons: Models.MustUseDemonsMap = prepareIngredientsSettingsForFinalFilter(ingredientsSettings, ingredients);
   let filterFunction = filterDemonsAfterCalculation.bind(undefined, mustUseDemons);
-  for (const ingCount in fusionResults.data) {
-    if (Number(ingCount) === 1) { continue; }
-    for (const id in fusionResults.data[ingCount]) {
-      let demonAry: Models.FusedDemon[] = fusionResults.data[ingCount][id];
-      demonAry = demonAry.filter((demon) => { return !demon.isWeakerThanIngredients() });
-      demonAry = demonAry.filter(filterFunction);
-      fusionResults.data[ingCount][id] = demonAry;
-      if (demonAry.length === 0) {
-        delete fusionResults.data[ingCount][id];
-      }
-    }
-  }
+  fusionResults.filter(filterFunction);
 
-  fusionResults.updateMetaData();
   return fusionResults;
 }
 
-function updateViableSpecialRecipes(fusionResults: Models.FusionResults, ingCountNodeToRegister: number, specialRecipes: Models.SpecialRecipes, viableSpecialRecipes: Models.SpecialRecipes, maxIngredient: number) {
-  for (const demonId in fusionResults.data[ingCountNodeToRegister]) {
-    for (let recipeIngCount = 2; recipeIngCount <= maxIngredient; recipeIngCount++) {
+function updateViableSpecialRecipes(fusionResults: Models.FusionResults, ingCountNodeToUpdate: number, specialRecipes: Models.SpecialRecipes, viableSpecialRecipes: Models.SpecialRecipes) {
+  for (const demonId in fusionResults.data[ingCountNodeToUpdate]) {
+    for (let recipeIngCount = 2; recipeIngCount <= fusionResults.getMaxIngredient(); recipeIngCount++) {
       if (!specialRecipes[recipeIngCount]) { continue; }
       for (const recipe of specialRecipes[recipeIngCount]) {
-        const registrationSuccessful: boolean = recipe.registerIngredient(Number(demonId), ingCountNodeToRegister);
+        const registrationSuccessful: boolean = recipe.registerIngredient(Number(demonId), ingCountNodeToUpdate);
         if (registrationSuccessful && recipe.isViable()) {
           const recipeCost: number = recipe.totalBaseIngredientsCost();
           if (!viableSpecialRecipes[recipeCost]) {
@@ -135,36 +116,29 @@ function updateViableSpecialRecipes(fusionResults: Models.FusionResults, ingCoun
 
 function calculateTripleFusionCombinations(demonCompendium: DemonCompendium, userSettings: UserSettings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number): void {
   let ingCounts: number[] = [];
-  const fusionResultsData = fusionResults.data;
   while (getNextCombinationTuple(ingCounts, 3, ingCountR)) {
     const [ingCountA, ingCountB, ingCountC] = ingCounts;
     const alreadyCalculatedAsA: { [id: number]: boolean } = {};
-    for (const idA in fusionResultsData[ingCountA]) {
-      if (fusionResultsData[ingCountA][idA].length === 0) { continue; }
-      const speciesA: Models.Demon = fusionResultsData[ingCountA][idA][0].demon;
+    for (const idA in fusionResults.data[ingCountA]) {
+      if (fusionResults.data[ingCountA][idA].length === 0) { continue; }
+      const speciesA: Models.Demon = fusionResults.data[ingCountA][idA][0].demon;
 
       const alreadyCalculatedAsB: { [id: number]: boolean } = {};
-      for (const idB in fusionResultsData[ingCountB]) {
+      for (const idB in fusionResults.data[ingCountB]) {
         if (alreadyCalculatedAsA[Number(idB)]) { continue; }
-        if (fusionResultsData[ingCountB][idB].length === 0) { continue; }
-        const speciesB: Models.Demon = fusionResultsData[ingCountB][idB][0].demon;
+        if (fusionResults.data[ingCountB][idB].length === 0) { continue; }
+        const speciesB: Models.Demon = fusionResults.data[ingCountB][idB][0].demon;
 
-        for (const idC in fusionResultsData[ingCountC]) {
+        for (const idC in fusionResults.data[ingCountC]) {
           if (alreadyCalculatedAsA[Number(idC)]) { continue; }
           if (alreadyCalculatedAsB[Number(idC)]) { continue; }
-          if (fusionResultsData[ingCountC][idC].length === 0) { continue; }
-          const speciesC: Models.Demon = fusionResultsData[ingCountC][idC][0].demon;
+          if (fusionResults.data[ingCountC][idC].length === 0) { continue; }
+          const speciesC: Models.Demon = fusionResults.data[ingCountC][idC][0].demon;
           const speciesR: Models.Demon | undefined = demonCompendium.tripleFuseDemons(speciesA, speciesB, speciesC);
           if (!speciesR) { continue; }
           if (!filterDemonsAfterSpeciesFusion(fusionResults, userSettings, speciesR, ingCountR, [speciesA, speciesB, speciesC])) { continue; }
-          const resultFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResultsData[ingCountA][idA], fusionResultsData[ingCountB][idB], fusionResultsData[ingCountC][idC]);
-          if (resultFusedDemons.length === 0) { continue; }
-          if (!fusionResultsData[ingCountR][speciesR.id]) {
-            fusionResultsData[ingCountR][speciesR.id] = [];
-          }
-          for (const fusedDemon of resultFusedDemons) {
-            fusionResultsData[ingCountR][speciesR.id].push(fusedDemon);
-          }
+          const resultFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResults.data[ingCountA][idA], fusionResults.data[ingCountB][idB], fusionResults.data[ingCountC][idC]);
+          fusionResults.addFusedDemonsOfSameSpecies(resultFusedDemons);
         }
         alreadyCalculatedAsB[speciesB.id] = true;
       }
@@ -197,13 +171,7 @@ function calculateSpecialRecipeFusion(demonCompendium: DemonCompendium, userSett
     if (!filterDemonsAfterSpeciesFusion(fusionResults, userSettings, speciesR, ingCountR, ingredientsSpecies)) { continue; }
 
     const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, ...ingredientsFusedDemons);
-    if (resultingFusedDemons.length === 0) { continue; }
-    if (!fusionResults.data[ingCountR][speciesR.id]) {
-      fusionResults.data[ingCountR][speciesR.id] = []; 
-    }
-    for (const fusedDemon of resultingFusedDemons) {
-      fusionResults.data[ingCountR][speciesR.id].push(fusedDemon);
-    }
+    fusionResults.addFusedDemonsOfSameSpecies(resultingFusedDemons);
   }
 }
 
@@ -233,11 +201,10 @@ function getNextCombinationTuple(currentTuple: number[], tupleSize: number, sumR
 }
 
 function filterDemonsAfterSpeciesFusion(fusionResults: Models.FusionResults, settings: UserSettings, speciesR: Models.Demon, ingCountR: number, speciesIngs: Models.Demon[]): boolean {
-  const fusionResultsData = fusionResults.data;
   // throw out the resulting species if we knew how to make it with fewer ingredients
   let canBeMadeWithLessIngredient: boolean = false;
   for (let sizeCheck = ingCountR - 1; sizeCheck >= 1; sizeCheck--) {
-    if (fusionResultsData[sizeCheck][speciesR.id]) {
+    if (fusionResults.data[sizeCheck][speciesR.id]) {
       canBeMadeWithLessIngredient = true;
       break;
     }
@@ -266,6 +233,7 @@ function filterDemonsAfterCrissCross(ingSettings: Models.IngredientsSettings, de
 }
 
 function filterDemonsAfterCalculation(mustUseDemons: Models.MustUseDemonsMap, demon: Models.FusedDemon): boolean {
+  if (demon.isWeakerThanBaseIngredients()) { return false; }
   const myMustUseDemons = {...mustUseDemons};
   const demonBaseIngCount = demon.getBaseIngredientsCounts();
   for (const demonId in demonBaseIngCount) {

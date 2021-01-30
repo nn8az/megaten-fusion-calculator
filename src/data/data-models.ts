@@ -71,21 +71,14 @@ export class FusedDemon {
         return Object.values(this.getBaseIngredientsDemons()).map(demon => demon.name).join(" ");
     }
 
-    public isWeakerThanIngredients(): boolean {
-        return this.demon.lvl < this.getHighestIngredientLvl();
-    }
-
-    private getHighestIngredientLvl(): number {
+    public isWeakerThanBaseIngredients(): boolean {
         let lvl: number = 0;
-        if (this.ingredients) {
-            for (const ingDemon of this.ingredients) {
-                let highestIngLvl: number = ingDemon.getHighestIngredientLvl();
-                if (highestIngLvl > lvl) { lvl = highestIngLvl; }
+        for (const demon of Object.values(this.getBaseIngredientsDemons())) {
+            if (demon.lvl > lvl) {
+                lvl = demon.lvl
             }
-            return lvl;
-        } else {
-            return this.demon.lvl;
         }
+        return this.demon.lvl < lvl;
     }
 }
 
@@ -101,17 +94,21 @@ export class DemonsPreset {
 
 export class FusionResults {
     data: { [ingredientCount: number]: { [demonId: number]: FusedDemon[] } };
-    metadata: {
-        ingredientCountMap: { [demonId: number]: number }
+    private metadata: {
+        ingredientCountMap: { [demonId: number]: number },
+        maxIngredient: number
     };
 
-    constructor() {
+    constructor(maxIngredient?: number) {
         this.data = {};
-        this.metadata = { ingredientCountMap: {} };
-    }
+        this.metadata = { ingredientCountMap: {}, maxIngredient: 0 };
 
-    public updateMetaData(): void {
-        this.populateFusionResultsIngCountMap();
+        if (maxIngredient) {
+            this.metadata.maxIngredient = maxIngredient;
+            for (let size = 1; size <= maxIngredient; size++) {
+                this.data[size] = {};
+            }
+        }
     }
 
     public getIngredientCount(demonId: number): number | undefined {
@@ -127,6 +124,56 @@ export class FusionResults {
                 break; }
         }
         return hasFusionResult;
+    }
+
+    public addFusedDemonsOfSameSpecies(fusedDemons: FusedDemon[]): void {
+        if (fusedDemons.length === 0) { return; }
+        let ingCount: number = 0;
+        Object.values(fusedDemons[0].getBaseIngredientsCounts()).map(count => ingCount += count);
+        const species: Demon = fusedDemons[0].demon;
+        if (!this.addNewSpecies(species, ingCount)) { return; }
+        for (const fusedDemon of fusedDemons) {
+            this.data[ingCount][species.id].push(fusedDemon);
+        }
+    }
+
+    public updateMetaData(): void {
+        this.populateFusionResultsIngCountMap();
+    }
+
+    public filter(filterFunc: (demon: FusedDemon) => boolean): void {
+        for (const ingCount in this.data) {
+            if (Number(ingCount) === 1) { continue; }
+            for (const id in this.data[ingCount]) {
+                let demonAry: FusedDemon[] = this.data[ingCount][id];
+                demonAry = demonAry.filter(filterFunc);
+                this.data[ingCount][id] = demonAry;
+                if (demonAry.length === 0) {
+                    delete this.data[ingCount][id];
+                    delete this.metadata.ingredientCountMap[id];
+                }
+            }
+        }
+    }
+
+    public getMaxIngredient(): number {
+        return this.metadata.maxIngredient;
+    }
+
+    private addNewSpecies(species: Demon, ingCount: number): boolean {
+        if (ingCount > this.metadata.maxIngredient) { return false; }
+        const existingIngCount: number | undefined = this.getIngredientCountForSpecies(species);
+        if (existingIngCount !== undefined && existingIngCount < ingCount) { return false; }
+
+        if (!this.data[ingCount][species.id]) {
+            this.data[ingCount][species.id] = [];
+            this.metadata.ingredientCountMap[species.id] = ingCount;
+        }
+        return true;
+    }
+
+    private getIngredientCountForSpecies(species: Demon): number | undefined {
+        return this.metadata.ingredientCountMap[species.id];
     }
 
     private populateFusionResultsIngCountMap(): void {
