@@ -26,6 +26,7 @@ export class DemonCompendium {
     private tripleFusionChart: { [race: string]: { [race: string]: string | undefined } } = {};
     private elementsMap: { [demonId: number]: Models.Demon } = {};
     private elementFusionChart: { [race: string]: { [elementId: string]: number | undefined } } = {};
+    private specialRecipes: Models.SpecialRecipes = {};
     private demonsPresets: Models.DemonsPreset[] = [];
 
     private _sameRaceFuseToElement: boolean = false;
@@ -67,6 +68,17 @@ export class DemonCompendium {
 
     public getDemonPresets(): Models.DemonsPreset[] {
         return this.demonsPresets;
+    }
+
+    public getSpecialRecipes(): Models.SpecialRecipes {
+        const ret: Models.SpecialRecipes = {};
+        for (const ingCount in this.specialRecipes) {
+            ret[ingCount] = [];
+            for (const recipe of this.specialRecipes[ingCount]) {
+                ret[ingCount].push(Models.Recipe.clone(recipe));
+            }
+        }
+        return ret;
     }
 
     public get enableTripleFusion(): boolean {
@@ -244,10 +256,25 @@ export class DemonCompendium {
         }
 
         if (fusionChartJson.specialRecipes) {
-            for (const demonName in fusionChartJson.specialRecipes) {
-                const demon = this.getDemonByName(demonName);
-                if (!demon) { continue; }
-                demon.specialRecipe = true;
+            for (const resultName in fusionChartJson.specialRecipes) {
+                // Parse data in the json file
+                const result: Models.Demon | undefined = this.getDemonByName(resultName);
+                if (!result) { continue; }
+                const ingredientsNames: string[] = fusionChartJson.specialRecipes[resultName];
+                if (ingredientsNames.length === 0) { continue; }
+                const recipe: Models.Recipe = new Models.Recipe(result.id);
+                for (const ingredientName of ingredientsNames) {
+                    const ingredient: Models.Demon | undefined = this.getDemonByName(ingredientName);
+                    if (!ingredient) { continue; }
+                    recipe.addIngredient(ingredient.id);
+                }
+
+                // Set parsed data
+                result.specialRecipe = true;
+                if (!this.specialRecipes[ingredientsNames.length]) {
+                    this.specialRecipes[ingredientsNames.length] = [];
+                }
+                this.specialRecipes[ingredientsNames.length].push(recipe);
             }
         }
 

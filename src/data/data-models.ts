@@ -138,6 +138,56 @@ export class FusionResults {
     }
 }
 
+export class Recipe {
+    resultId: number;
+    ingredients: { [demonId: number]: number } = {};
+
+    constructor(resultId: number) {
+        this.resultId = resultId;
+    }
+
+    public static clone(recipe: Recipe): Recipe {
+        const clonedRecipe = new Recipe(recipe.resultId);
+        clonedRecipe.ingredients = {...recipe.ingredients};
+        return clonedRecipe;
+    }
+
+    public addIngredient(ingredientId: number) {
+        this.ingredients[ingredientId] = 0;
+    }
+
+    public registerIngredient(ingredientId: number, baseIngredientCost?: number): boolean {
+        if (this.ingredients[ingredientId] === undefined) {
+            return false;
+        }
+        if (baseIngredientCost !== undefined && baseIngredientCost > 0) {
+            this.ingredients[ingredientId] = baseIngredientCost;
+        }
+        else {
+            this.ingredients[ingredientId] = 1;
+        }
+        return true;
+    }
+
+    public isViable(): boolean {
+        for (const ingId in this.ingredients) {
+            if (this.ingredients[ingId] === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public totalBaseIngredientsCost(): number {
+        let sum: number = 0;
+        for (const ingId in this.ingredients) {
+            sum += this.ingredients[ingId];
+        }
+        return sum;
+    }
+}
+
 export type Ingredients = { [demonId: number]: boolean };
 export type IngredientsSettings = { [demonId: number]: { mustUse: boolean, multipleUse: boolean } };
-export type MustUseDemonsMap = {[demonId: number]: boolean};
+export type MustUseDemonsMap = { [demonId: number]: boolean };
+export type SpecialRecipes = { [ingredientCount: number]: Recipe[] };

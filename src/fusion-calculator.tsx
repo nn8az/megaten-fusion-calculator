@@ -32,78 +32,111 @@ async function calculateAllFusionCombinationsAsync(ingredients: Models.Ingredien
   return promise;
 }
 
-function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: UserSettings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
-  const newFusionResults = new Models.FusionResults();
-  const newFusionResultsData = newFusionResults.data;
-  for (let size = 1; size <= settings.maxIngredient && size <= MAX_FUSION_INGREDIENT_HARD_CAP; size++) {
-    newFusionResultsData[size] = {};
+function calculateAllFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, userSettings: UserSettings, ingredientsSettings: Models.IngredientsSettings): Models.FusionResults {
+  const fusionResults = new Models.FusionResults();
+  const specialRecipes: Models.SpecialRecipes = demonCompendium.getSpecialRecipes();
+  const viableSpecialRecipes: Models.SpecialRecipes = {};
+  const maxIngredient: number = (userSettings.maxIngredient < MAX_FUSION_INGREDIENT_HARD_CAP) ? userSettings.maxIngredient : MAX_FUSION_INGREDIENT_HARD_CAP;
+
+  for (let size = 1; size <= maxIngredient; size++) {
+    fusionResults.data[size] = {};
   }
 
   for (const demonId in ingredients) {
     const demon: Models.Demon | undefined = demonCompendium.getDemonById(Number(demonId));
     if (!demon) { continue; }
     const fusedDemon: Models.FusedDemon = new Models.FusedDemon(demon);
-    if (!newFusionResultsData[1][demon.id]) {
-      newFusionResultsData[1][demon.id] = [];
+    if (!fusionResults.data[1][demon.id]) {
+      fusionResults.data[1][demon.id] = [];
     }
-    newFusionResultsData[1][demon.id].push(fusedDemon);
+    fusionResults.data[1][demon.id].push(fusedDemon);
   }
+  updateViableSpecialRecipes(fusionResults, 1, specialRecipes, viableSpecialRecipes, maxIngredient);
 
-  for (let ingCountR = 2; ingCountR <= settings.maxIngredient && ingCountR <= MAX_FUSION_INGREDIENT_HARD_CAP; ingCountR++) {
+  // Compute double fusions
+  for (let ingCountR = 2; ingCountR <= maxIngredient; ingCountR++) {
     for (let ingCountA = ingCountR - 1; ingCountA >= (ingCountR / 2); ingCountA--) {
       const ingCountB: number = ingCountR - ingCountA;
       const speciesUsedAsA: { [id: number]: boolean } = {}; // id of the demon species that have already been used in the calculation as demon A
-      for (const idA in newFusionResultsData[ingCountA]) {
-        if (newFusionResultsData[ingCountA][idA].length === 0) { continue; }
-        const speciesA: Models.Demon = newFusionResultsData[ingCountA][idA][0].demon;
-        for (const idB in newFusionResultsData[ingCountB]) {
-          if (newFusionResultsData[ingCountB][idB].length === 0) { continue; }
-          const speciesB: Models.Demon = newFusionResultsData[ingCountB][idB][0].demon;
+      for (const idA in fusionResults.data[ingCountA]) {
+        if (fusionResults.data[ingCountA][idA].length === 0) { continue; }
+        const speciesA: Models.Demon = fusionResults.data[ingCountA][idA][0].demon;
+        for (const idB in fusionResults.data[ingCountB]) {
+          if (fusionResults.data[ingCountB][idB].length === 0) { continue; }
+          const speciesB: Models.Demon = fusionResults.data[ingCountB][idB][0].demon;
 
           // skip calculating fusions that should have already been calculated since A+B produces the same results as B+A
           if (speciesUsedAsA[speciesB.id]) { continue; }
 
           const speciesR: Models.Demon | undefined = demonCompendium.fuseDemons(speciesA, speciesB);
           if (!speciesR) { continue; }
-          if (!filterDemonsAfterSpeciesFusion(newFusionResults, settings, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
+          if (!filterDemonsAfterSpeciesFusion(fusionResults, userSettings, speciesR, ingCountR, [speciesA, speciesB])) { continue; }
 
-          const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, newFusionResultsData[ingCountA][idA], newFusionResultsData[ingCountB][idB]);
-          if (!newFusionResultsData[ingCountR][speciesR.id]) { newFusionResultsData[ingCountR][speciesR.id] = []; }
+          const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResults.data[ingCountA][idA], fusionResults.data[ingCountB][idB]);
+          if (!fusionResults.data[ingCountR][speciesR.id]) { fusionResults.data[ingCountR][speciesR.id] = []; }
           for (const fusedDemon of resultingFusedDemons) {
-            newFusionResultsData[ingCountR][speciesR.id].push(fusedDemon);
+            fusionResults.data[ingCountR][speciesR.id].push(fusedDemon);
           }
         }
         speciesUsedAsA[speciesA.id] = true;
       }
     }
 
-    if (settings.useTripleFusion) {
-      calculateTripleFusionCombinations(ingredients, demonCompendium, settings, ingredientsSettings, newFusionResults, ingCountR);
+    // Compute triple fusions
+    if (userSettings.useTripleFusion) {
+      calculateTripleFusionCombinations(demonCompendium, userSettings, ingredientsSettings, fusionResults, ingCountR);
     }
+
+    // Compute special recipe fusions
+    calculateSpecialRecipeFusion(demonCompendium, userSettings, ingredientsSettings, fusionResults, ingCountR, viableSpecialRecipes);
+
+    // Update viable special recipes
+    updateViableSpecialRecipes(fusionResults, ingCountR, specialRecipes, viableSpecialRecipes, maxIngredient);
   }
 
   // At this point, we're completely finished with all fusion combinations
-  // Re-traverse the entire results and purge fusions that don't satisfy various constraints/settings
+  // Re-traverse through all of the results and purge fusions that don't satisfy various constraints/settings
   const mustUseDemons: Models.MustUseDemonsMap = prepareIngredientsSettingsForFinalFilter(ingredientsSettings, ingredients);
   let filterFunction = filterDemonsAfterCalculation.bind(undefined, mustUseDemons);
-  for (const ingCount in newFusionResultsData) {
+  for (const ingCount in fusionResults.data) {
     if (Number(ingCount) === 1) { continue; }
-    for (const id in newFusionResultsData[ingCount]) {
-      let demonAry: Models.FusedDemon[] = newFusionResultsData[ingCount][id];
+    for (const id in fusionResults.data[ingCount]) {
+      let demonAry: Models.FusedDemon[] = fusionResults.data[ingCount][id];
       demonAry = demonAry.filter((demon) => { return !demon.isWeakerThanIngredients() });
       demonAry = demonAry.filter(filterFunction);
-      newFusionResultsData[ingCount][id] = demonAry;
+      fusionResults.data[ingCount][id] = demonAry;
+      if (demonAry.length === 0) {
+        delete fusionResults.data[ingCount][id];
+      }
     }
   }
 
-  newFusionResults.updateMetaData();
-  return newFusionResults;
+  fusionResults.updateMetaData();
+  return fusionResults;
 }
 
-function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demonCompendium: DemonCompendium, settings: UserSettings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number): void {
+function updateViableSpecialRecipes(fusionResults: Models.FusionResults, ingCountNodeToRegister: number, specialRecipes: Models.SpecialRecipes, viableSpecialRecipes: Models.SpecialRecipes, maxIngredient: number) {
+  for (const demonId in fusionResults.data[ingCountNodeToRegister]) {
+    for (let recipeIngCount = 2; recipeIngCount <= maxIngredient; recipeIngCount++) {
+      if (!specialRecipes[recipeIngCount]) { continue; }
+      for (const recipe of specialRecipes[recipeIngCount]) {
+        const registrationSuccessful: boolean = recipe.registerIngredient(Number(demonId), ingCountNodeToRegister);
+        if (registrationSuccessful && recipe.isViable()) {
+          const recipeCost: number = recipe.totalBaseIngredientsCost();
+          if (!viableSpecialRecipes[recipeCost]) {
+            viableSpecialRecipes[recipeCost] = [];
+          }
+          viableSpecialRecipes[recipeCost].push(recipe);
+        }
+      }
+    }
+  }
+}
+
+function calculateTripleFusionCombinations(demonCompendium: DemonCompendium, userSettings: UserSettings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number): void {
   let ingCounts: number[] = [];
   const fusionResultsData = fusionResults.data;
-  while (getNextTripleFusionIngCounts(ingCounts, ingCountR)) {
+  while (getNextCombinationTuple(ingCounts, 3, ingCountR)) {
     const [ingCountA, ingCountB, ingCountC] = ingCounts;
     const alreadyCalculatedAsA: { [id: number]: boolean } = {};
     for (const idA in fusionResultsData[ingCountA]) {
@@ -123,9 +156,12 @@ function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demo
           const speciesC: Models.Demon = fusionResultsData[ingCountC][idC][0].demon;
           const speciesR: Models.Demon | undefined = demonCompendium.tripleFuseDemons(speciesA, speciesB, speciesC);
           if (!speciesR) { continue; }
-          if (!filterDemonsAfterSpeciesFusion(fusionResults, settings, speciesR, ingCountR, [speciesA, speciesB, speciesC])) { continue; }
+          if (!filterDemonsAfterSpeciesFusion(fusionResults, userSettings, speciesR, ingCountR, [speciesA, speciesB, speciesC])) { continue; }
           const resultFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, fusionResultsData[ingCountA][idA], fusionResultsData[ingCountB][idB], fusionResultsData[ingCountC][idC]);
-          if (!fusionResultsData[ingCountR][speciesR.id]) { fusionResultsData[ingCountR][speciesR.id] = []; }
+          if (resultFusedDemons.length === 0) { continue; }
+          if (!fusionResultsData[ingCountR][speciesR.id]) {
+            fusionResultsData[ingCountR][speciesR.id] = [];
+          }
           for (const fusedDemon of resultFusedDemons) {
             fusionResultsData[ingCountR][speciesR.id].push(fusedDemon);
           }
@@ -137,19 +173,59 @@ function calculateTripleFusionCombinations(ingredients: Models.Ingredients, demo
   }
 }
 
-function getNextTripleFusionIngCounts(fusionIngCounts: number[], ingCountR: number): boolean {
-  if (ingCountR < 3) { return false; }
-  if (fusionIngCounts.length < 3) { 
-    fusionIngCounts[0] = ingCountR - 2;
-    fusionIngCounts[1] = 1;
-    fusionIngCounts[2] = 1;
+function calculateSpecialRecipeFusion(demonCompendium: DemonCompendium, userSettings: UserSettings, ingredientsSettings: Models.IngredientsSettings, fusionResults: Models.FusionResults, ingCountR: number, viableSpecialRecipes: Models.SpecialRecipes): void {
+  const currSpecialRecipes: Models.Recipe[] | undefined = viableSpecialRecipes[ingCountR];
+  if (!currSpecialRecipes) { return; }
+  for (const specialRecipe of currSpecialRecipes) {
+    const speciesR: Models.Demon | undefined = demonCompendium.getDemonById(specialRecipe.resultId);
+    if (!speciesR) { continue; }
+
+    const ingredientsSpecies: Models.Demon[] = [];
+    const ingredientsFusedDemons: Models.FusedDemon[][] = [];
+    let missingIngredient: boolean = false;
+    for (const ingredientId in specialRecipe.ingredients) {
+      const ingredientSpecies: Models.Demon | undefined = demonCompendium.getDemonById(Number(ingredientId));
+      if (!ingredientSpecies) {
+        missingIngredient = true;
+        break;
+      }
+      ingredientsSpecies.push(ingredientSpecies);
+      const ingredientCost: number = specialRecipe.ingredients[ingredientId];
+      ingredientsFusedDemons.push(fusionResults.data[ingredientCost][ingredientSpecies.id]);
+    }
+    if (missingIngredient) { continue; }
+    if (!filterDemonsAfterSpeciesFusion(fusionResults, userSettings, speciesR, ingCountR, ingredientsSpecies)) { continue; }
+
+    const resultingFusedDemons: Models.FusedDemon[] = crissCrossFusedDemons(speciesR, ingredientsSettings, ...ingredientsFusedDemons);
+    if (resultingFusedDemons.length === 0) { continue; }
+    if (!fusionResults.data[ingCountR][speciesR.id]) {
+      fusionResults.data[ingCountR][speciesR.id] = []; 
+    }
+    for (const fusedDemon of resultingFusedDemons) {
+      fusionResults.data[ingCountR][speciesR.id].push(fusedDemon);
+    }
+  }
+}
+
+function getNextCombinationTuple(currentTuple: number[], tupleSize: number, sumRequirement: number): boolean {
+  if (sumRequirement < tupleSize) { return false; }
+  if (currentTuple.length > tupleSize) { return false; }
+
+  // Initialize the tuple if given an empty tuple
+  if (currentTuple.length === 0) { 
+    currentTuple[0] = sumRequirement - tupleSize + 1;
+    for (let i = 1; i < tupleSize; i++) {
+      currentTuple[i] = 1;
+    }
     return true;
   }
-  for (let i = fusionIngCounts.length - 2; i >= 0; i--) {
+
+  // If not given an empty tuple, compute the next tuple
+  for (let i = currentTuple.length - 2; i >= 0; i--) {
     const j: number = i + 1;
-    if (fusionIngCounts[i] - fusionIngCounts[j] >= 2) {
-      fusionIngCounts[i] = fusionIngCounts[i] - 1;
-      fusionIngCounts[j] = fusionIngCounts[j] + 1;
+    if (currentTuple[i] - currentTuple[j] >= 2) {
+      currentTuple[i] = currentTuple[i] - 1;
+      currentTuple[j] = currentTuple[j] + 1;
       return true;
     }
   }
