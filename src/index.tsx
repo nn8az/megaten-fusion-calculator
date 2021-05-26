@@ -9,7 +9,7 @@ import {
 } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 
-import App from './app';
+import App from './App';
 
 ReactDOM.render(<GitHubPageRedirect />,
   document.getElementById('gitHubPageRedirector'));

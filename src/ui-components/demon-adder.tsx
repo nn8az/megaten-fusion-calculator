@@ -74,7 +74,7 @@ function AddByDemon(params: {
             autoHighlight={true}
             autoSelect={true}
             size="small"
-            renderInput={(params) => <TextField {...params} label="Enter demon name" variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label="Enter creature name" variant="outlined" />}
         />
         <AddButton onClick={onAddButtonClick} />
     </div>

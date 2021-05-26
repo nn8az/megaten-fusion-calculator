@@ -359,20 +359,20 @@ export default function FusionCalculator(props: { demonCompendium: DemonCompendi
   }
 
   function openDemonRecipesHandler(demonId: number) {
-    history.push(`${routeMatcher.url}/demon/${demonId}`);
+    history.push(`${routeMatcher.url}/creature/${demonId}`);
   }
   
   return (
     <Router history={history}>
       <Switch>
-        <Route path={`${routeMatcher.path}/demon/:demonId`}>
+        <Route path={`${routeMatcher.path}/creature/:demonId`}>
           <DemonDisplayer demonCompendium={demonCompendium} goBackUrlPath={routeMatcher.url} fusionResults={fusionResults} />
         </Route>
         <Route path={`${routeMatcher.path}/`}>
 
           <div className={styles.fusionCalculator + (fusionResultsPromise ? " " + styles.loading : "")}>
             <div className={styles.section}>
-              <h2>Add Demons to Use as Fusion Ingredients</h2>
+              <h2>Add Creatures to Use as Fusion Ingredients</h2>
               <div className={styles.addDemonsAndButtonsRowContainer}>
                 <DemonAdder key={resetterKey} demonCompendium={demonCompendium} onAddDemon={addDemonToIngredientsHandler} />
                 <div className={styles.buttonsRow}>

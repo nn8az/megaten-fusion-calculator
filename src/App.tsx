@@ -7,7 +7,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import { DemonCompendium } from './data/demon-compendium';
 import FusionCalculator from './fusion-calculator';
 
-import './app.scss';
+import './App.scss';
 import { Tab, Tabs } from '@material-ui/core';
 
 const theme = createMuiTheme({
@@ -124,7 +124,7 @@ export default function App(): JSX.Element {
       <div className="myApp">
 
         <header>
-          <h1>MegaTen Fusion by Results Calculator</h1>
+          <h1>MegaTen Fuse by Result Calculator</h1>
         </header>
         <Tabs value={currentGame} onChange={changeGameTabHandler}>
           <Tab label="Persona 4 Golden" />
