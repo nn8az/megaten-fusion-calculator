@@ -1,0 +1,2 @@
+(this["webpackJsonpmegaten-fuse-by-result-calculator"]=this["webpackJsonpmegaten-fuse-by-result-calculator"]||[]).push([[10],{204:function(e){e.exports=JSON.parse('{"sameRaceFuseToElement":false,"enableTripleFusion":true,"disableSameDemonFusion":true}')}}]);
+//# sourceMappingURL=10.9f27507d.chunk.js.map

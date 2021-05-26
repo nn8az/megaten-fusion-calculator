@@ -1,0 +1,2 @@
+(this["webpackJsonpmegaten-fuse-by-result-calculator"]=this["webpackJsonpmegaten-fuse-by-result-calculator"]||[]).push([[7],{201:function(e){e.exports=JSON.parse('{"presets":[{"caption":"Elements","demons":["Erthys","Aeros","Aquans","Flaemis"]}]}')}}]);
+//# sourceMappingURL=7.6c7fe2e8.chunk.js.map
