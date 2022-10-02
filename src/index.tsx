@@ -20,11 +20,11 @@ ReactDOM.render(
   <React.StrictMode>
     <Router history={history}>
       <Switch>
-        <Route path="/megaten-fuse-by-result-calculator/:gameStrCode?">
+        <Route path="/megaten-fusion-calculator/:gameStrCode?">
           <App/>
         </Route>
         <Route path="/">
-          <Redirect to="/megaten-fuse-by-result-calculator/" />
+          <Redirect to="/megaten-fusion-calculator/" />
         </Route>
       </Switch>
     </Router>

@@ -1,6 +1,6 @@
 {
-  "homepage": "http://noblenugget.github.io/megaten-fuse-by-result-calculator/",
-  "name": "megaten-fuse-by-result-calculator",
+  "homepage": "http://noblenugget.github.io/megaten-fusion-calculator/",
+  "name": "megaten-fusion-calculator",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

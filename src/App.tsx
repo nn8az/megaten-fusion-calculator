@@ -102,7 +102,7 @@ export default function App(): JSX.Element {
     if (gameId !== currentGame) {
       setDemonCompendium(undefined);
     }
-    history.push("/megaten-fuse-by-result-calculator/" + getGameUrlPath(gameId));
+    history.push("/megaten-fusion-calculator/" + getGameUrlPath(gameId));
   };
 
   const gameFromUrlParam: Game | undefined = urlParamToGameMap[urlParams.gameStrCode];
