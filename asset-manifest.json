@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/megaten-fusion-calculator/static/css/main.d7a8efac.chunk.css",
-    "main.js": "/megaten-fusion-calculator/static/js/main.b044f9dc.chunk.js",
-    "main.js.map": "/megaten-fusion-calculator/static/js/main.b044f9dc.chunk.js.map",
+    "main.js": "/megaten-fusion-calculator/static/js/main.12761cbb.chunk.js",
+    "main.js.map": "/megaten-fusion-calculator/static/js/main.12761cbb.chunk.js.map",
     "runtime-main.js": "/megaten-fusion-calculator/static/js/runtime-main.6bbbfa99.js",
     "runtime-main.js.map": "/megaten-fusion-calculator/static/js/runtime-main.6bbbfa99.js.map",
     "static/js/2.1bfad8f0.chunk.js": "/megaten-fusion-calculator/static/js/2.1bfad8f0.chunk.js",
@@ -37,6 +37,6 @@
     "static/js/runtime-main.6bbbfa99.js",
     "static/js/2.1bfad8f0.chunk.js",
     "static/css/main.d7a8efac.chunk.css",
-    "static/js/main.b044f9dc.chunk.js"
+    "static/js/main.12761cbb.chunk.js"
   ]
 }
