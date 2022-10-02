@@ -124,7 +124,7 @@ export default function App(): JSX.Element {
       <div className="myApp">
 
         <header>
-          <h1>MegaTen Fuse by Result Calculator</h1>
+          <h1>MegaTen Fusion Calculator</h1>
         </header>
         <Tabs value={currentGame} onChange={changeGameTabHandler}>
           <Tab label="Persona 4 Golden" />
